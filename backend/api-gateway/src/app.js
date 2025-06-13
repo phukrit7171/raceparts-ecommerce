@@ -29,9 +29,15 @@ const services = [
         route: '/api/auth',
         target: `http://localhost:${process.env.AUTH_SERVICE_PORT || 3001}`
     },
-    // We will add other services here as we build them
-    // { route: '/api/products', target: `http://localhost:${process.env.PRODUCT_SERVICE_PORT || 3002}` },
-    // { route: '/api/cart', target: `http://localhost:${process.env.CART_SERVICE_PORT || 3003}` },
+
+    { 
+        route: '/api/products', 
+        target: `http://localhost:${process.env.PRODUCT_SERVICE_PORT || 3002}` 
+    },
+    { 
+        route: '/api/cart', 
+        target: `http://localhost:${process.env.CART_SERVICE_PORT || 3003}` 
+    }
 ];
 
 // Set up proxies for each service
@@ -46,7 +52,7 @@ services.forEach(({ route, target }) => {
         on: {
             proxyReq: (proxyReq, req, res) => {
                 console.log(`[Gateway] Rewriting and proxying ${req.method} ${req.originalUrl} to ${target}${proxyReq.path}`);
-                
+
                 // For POST/PUT/PATCH requests, we need to re-stream the body.
                 if (req.body && (req.method === 'POST' || req.method === 'PUT' || req.method === 'PATCH')) {
                     const bodyData = JSON.stringify(req.body);

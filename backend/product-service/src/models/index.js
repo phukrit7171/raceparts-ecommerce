@@ -1,9 +1,10 @@
+// backend/product-service/src/models/index.js
 const { Sequelize, Op } = require('sequelize');
 const path = require('path');
 const fs = require('fs');
 
 const env = process.env.NODE_ENV || 'development';
-const config = require(path.join(__dirname, '..', '..', '..', 'database', 'config.js'))[env];
+const config = require(path.join(__dirname, '..', '..', '..', '..', 'database', 'config.js'))[env];
 
 const sequelize = new Sequelize(config);
 const db = {};
