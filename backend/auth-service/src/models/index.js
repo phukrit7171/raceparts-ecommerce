@@ -5,12 +5,9 @@ const fs = require('fs');
 const path = require('path');
 
 const env = process.env.NODE_ENV || 'development';
-const config = require(path.join(__dirname, '..', '..', '..' ,'..','database','config.json'))[env]
+const config = require(path.join(__dirname, '..', '..', '..' ,'..','database','config.js'))[env]
 
-const sequelize = new Sequelize({
-  ...config,
-  storage: path.join(__dirname, '..', '..', '..', 'database', 'raceparts.db') // Correct path to DB
-});
+const sequelize = new Sequelize(config);
 
 const db = {};
 

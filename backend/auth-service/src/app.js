@@ -30,10 +30,10 @@ app.use('/api', limiter);
 
 
 // 2) ROUTES
-app.post('/api/auth/register', authController.register);
-app.post('/api/auth/login', authController.login);
-app.post('/api/auth/logout', authController.logout);
-app.get('/api/auth/me', authController.protect, authController.getMe);
+app.post('/register', authController.register);
+app.post('/login', authController.login);
+app.post('/logout', authController.logout);
+app.get('/me', authController.protect, authController.getMe);
 
 // Health check route
 app.get('/health', (req, res) => {
