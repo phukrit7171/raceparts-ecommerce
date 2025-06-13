@@ -63,7 +63,7 @@ graph TB
     style DOCKER fill:#f1f8e9
 ```
 
-### User Flow Diagram
+## User Flow Diagram
 
 ```mermaid
 flowchart TD
@@ -138,7 +138,7 @@ flowchart TD
     style ADMIN_PANEL fill:#3f51b5,color:#fff
 ```
 
-### Database Schema
+## Database Schema
 
 ```mermaid
 erDiagram
