@@ -7,53 +7,75 @@ const AdminJSSequelize = require('@adminjs/sequelize');
 const session = require('express-session');
 const bcrypt = require('bcryptjs');
 
-const { sequelize } = require('../../auth-service/src/models'); // We reuse the auth service's model loader
-const { User, Product, Category, Order, OrderItem } = sequelize.models;
+// --- v6 COMPATIBILITY CHANGES START HERE ---
 
-AdminJS.registerAdapter({
-    Adapter: AdminJSSequelize,
-    Database: sequelize
-});
+// 1. Explicitly import the base classes from the adapter
+const { Database, Resource } = AdminJSSequelize;
+
+// 2. Load the User model from the auth-service
+const UserModel = require('../../auth-service/src/models/User');
+
+// 3. Load Product and Category models from the product-service
+const ProductModel = require('../../product-service/src/models/Product');
+const CategoryModel = require('../../product-service/src/models/Category');
+
+// 4. Load Order and OrderItem models from the payment-service
+const OrderModel = require('../../payment-service/src/models/Order');
+const OrderItemModel = require('../../payment-service/src/models/OrderItem');
 
 const start = async () => {
+    // We need to initialize sequelize in this service as well to pass it to the models
+    const { sequelize } = require('../../auth-service/src/models');
+    
+    // Initialize each model with the sequelize instance
+    const User = UserModel(sequelize);
+    const Product = ProductModel(sequelize);
+    const Category = CategoryModel(sequelize);
+    const Order = OrderModel(sequelize);
+    const OrderItem = OrderItemModel(sequelize);
+
+    // This is the correct way to register the adapter in v6
+    AdminJS.registerAdapter({ Database, Resource });
+
+    // --- v6 COMPATIBILITY CHANGES END HERE ---
+
     const app = express();
 
-    // Session middleware for AdminJS authentication
     app.use(session({
-        secret: process.env.JWT_SECRET, // Reuse the JWT secret for session signing
+        secret: process.env.JWT_SECRET,
         resave: false,
         saveUninitialized: true,
     }));
 
     const adminJs = new AdminJS({
-        // List all the models we want to manage
+        // Pass the initialized models directly
         resources: [
-            { resource: User, options: { /* User options here */ } },
-            { resource: Product, options: { /* Product options here */ } },
-            { resource: Category, options: { /* Category options here */ } },
-            { resource: Order, options: { /* Order options here */ } },
-            { resource: OrderItem, options: { /* OrderItem options here */ } },
+            { resource: User, options: { /* User options */ } },
+            { resource: Product, options: { /* Product options */ } },
+            { resource: Category, options: { /* Category options */ } },
+            { resource: Order, options: { /* Order options */ } },
+            { resource: OrderItem, options: { /* OrderItem options */ } },
         ],
-        rootPath: '/admin', // The path to the admin panel
+        rootPath: '/admin',
         branding: {
             companyName: 'RaceParts E-commerce',
-            softwareBrothers: false, // Hide AdminJS branding
+            softwareBrothers: false,
         },
     });
 
     const adminRouter = AdminJSExpress.buildAuthenticatedRouter(adminJs, {
-        // Authentication logic for the admin panel
         authenticate: async (email, password) => {
             const user = await User.findOne({ where: { email } });
             if (user) {
                 const matched = await bcrypt.compare(password, user.password);
                 if (matched && user.role === 'admin') {
-                    return user.toJSON(); // Return user object (without password) on success
+                    // For v6, you might need to return the plain object
+                    return Promise.resolve(user.toJSON());
                 }
             }
             return false;
         },
-        cookiePassword: 'a-secure-cookie-password-change-this', // A separate password for the session cookie
+        cookiePassword: 'a-secure-cookie-password-change-this',
     });
 
     app.use(adminJs.options.rootPath, adminRouter);
