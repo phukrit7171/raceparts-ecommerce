@@ -1,0 +1,30 @@
+{
+  "name": "raceparts-ecommerce",
+  "version": "1.0.0",
+  "description": "Modern automotive accessories e-commerce platform",
+  "scripts": {
+    "install-all": "npm install && cd frontend && npm install && cd ../backend/api-gateway && npm install && cd ../auth-service && npm install && cd ../product-service && npm install && cd ../cart-service && npm install && cd ../payment-service && npm install && cd ../admin-service && npm install",
+    "dev": "concurrently \"npm run dev:gateway\" \"npm run dev:auth\" \"npm run dev:products\" \"npm run dev:cart\" \"npm run dev:payment\" \"npm run dev:admin\" \"npm run dev:frontend\"",
+    "dev:gateway": "cd backend/api-gateway && npm run dev",
+    "dev:auth": "cd backend/auth-service && npm run dev",
+    "dev:products": "cd backend/product-service && npm run dev",
+    "dev:cart": "cd backend/cart-service && npm run dev",
+    "dev:payment": "cd backend/payment-service && npm run dev",
+    "dev:admin": "cd backend/admin-service && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "db:migrate": "cd backend/auth-service && npx sequelize-cli db:migrate",
+    "db:seed": "cd backend/auth-service && npx sequelize-cli db:seed:all",
+    "db:reset": "cd backend/auth-service && npx sequelize-cli db:migrate:undo:all && npx sequelize-cli db:migrate && npx sequelize-cli db:seed:all",
+    "docker:build": "docker-compose build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=22.11.0"
+  }
+}
