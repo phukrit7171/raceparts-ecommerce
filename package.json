@@ -13,9 +13,9 @@
     "dev:admin": "cd backend/admin-service && npm run dev",
     "dev:frontend": "cd frontend && npm run dev",
     "build": "cd frontend && npm run build",
-    "db:migrate": "cd backend/auth-service && npx sequelize-cli db:migrate",
-    "db:seed": "cd backend/auth-service && npx sequelize-cli db:seed:all",
-    "db:reset": "cd backend/auth-service && npx sequelize-cli db:migrate:undo:all && npx sequelize-cli db:migrate && npx sequelize-cli db:seed:all",
+    "db:migrate": "npx sequelize-cli db:migrate",
+    "db:seed": "npx sequelize-cli db:seed:all",
+    "db:reset": "npx sequelize-cli db:migrate:undo:all && npm run db:migrate && npm run db:seed",
     "docker:build": "docker-compose build",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
@@ -26,5 +26,9 @@
   },
   "engines": {
     "node": ">=22.11.0"
+  },
+  "dependencies": {
+    "sequelize": "^6.37.7",
+    "sqlite3": "^5.1.7"
   }
 }

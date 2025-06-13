@@ -1,0 +1,55 @@
+// backend/auth-service/src/app.js
+
+require('dotenv').config({ path: '../../.env' }); // Load .env from root
+const express = require('express');
+const cors = require('cors');
+const cookieParser = require('cookie-parser');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const { sequelize } = require('./models');
+const authController = require('./controllers/authController');
+
+const app = express();
+
+// 1) GLOBAL MIDDLEWARE
+app.use(cors({
+    origin: 'http://localhost:5173', // Frontend URL
+    credentials: true
+}));
+
+app.use(helmet());
+app.use(cookieParser());
+app.use(express.json({ limit: '10kb' }));
+
+const limiter = rateLimit({
+    max: 100, // 100 requests from the same IP
+    windowMs: 60 * 60 * 1000, // in 1 hour
+    message: 'Too many requests from this IP, please try again in an hour!'
+});
+app.use('/api', limiter);
+
+
+// 2) ROUTES
+app.post('/api/auth/register', authController.register);
+app.post('/api/auth/login', authController.login);
+app.post('/api/auth/logout', authController.logout);
+app.get('/api/auth/me', authController.protect, authController.getMe);
+
+// Health check route
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'UP' });
+});
+
+// 3) DATABASE CONNECTION & SERVER START
+const PORT = process.env.AUTH_SERVICE_PORT || 3001;
+
+sequelize.authenticate()
+    .then(() => {
+        console.log('✅ Database connection has been established successfully.');
+        app.listen(PORT, () => {
+            console.log(`🚀 Auth service running on port ${PORT}`);
+        });
+    })
+    .catch(err => {
+        console.error('❌ Unable to connect to the database:', err);
+    });

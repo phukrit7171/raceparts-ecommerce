@@ -1,8 +1,7 @@
 {
   "development": {
     "dialect": "sqlite",
-    "storage": "./database/raceparts.db",
-    "logging": console.log
+    "storage": "./database/raceparts.db"
   },
   "production": {
     "dialect": "sqlite",
