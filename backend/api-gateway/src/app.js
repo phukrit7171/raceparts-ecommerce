@@ -64,7 +64,7 @@ const services = [
 ];
 
 // Set up proxies for each service
-sservices.forEach(({ route, target, protected: isProtected }) => {
+services.forEach(({ route, target, protected: isProtected }) => {
     app.use(route, (req, res, next) => {
         // --- ROUTE PROTECTION LOGIC ---
         if (isProtected && !req.user) {
