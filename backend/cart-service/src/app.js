@@ -14,7 +14,7 @@ app.use(extractUser);
 // Routes
 app.get('/', cartController.getCart);
 app.post('/', cartController.addItem);
-app.put('/:itemId', cartController.updateItem);
+app.patch('/:itemId', cartController.updateItem);
 app.delete('/:itemId', cartController.removeItem);
 
 // Health check (does not need user extraction)

@@ -60,40 +60,64 @@ const services = [
         route: '/api/cart', 
         target: `http://localhost:${process.env.CART_SERVICE_PORT || 3003}`,
         protected: true // Example of a protected route is protected and requires authentication
+    },
+    {
+        route: '/api/payment',
+        target: `http://localhost:${process.env.PAYMENT_SERVICE_PORT || 3004}`,
+        protected: true // Protected because creating a payment intent requires a logged-in user
     }
 ];
 
 // Set up proxies for each service
 services.forEach(({ route, target, protected: isProtected }) => {
-    app.use(route, (req, res, next) => {
-        // --- ROUTE PROTECTION LOGIC ---
-        if (isProtected && !req.user) {
-            return res.status(401).json({ success: false, message: 'Unauthorized: You must be logged in.' });
-        }
-        next();
-    }, 
-    createProxyMiddleware({
+
+    const proxyOptions = {
         target,
         changeOrigin: true,
         pathRewrite: { [`^${route}`]: '' },
         on: {
             proxyReq: (proxyReq, req, res) => {
-                // Pass user details to the downstream service in headers
+                console.log(`[Gateway] -> PROXYING ${req.method} ${req.originalUrl} to ${target}${proxyReq.path}`);
+
+                // Add user headers if the user object exists on the request
                 if (req.user) {
                     proxyReq.setHeader('x-user-id', req.user.id);
-                    proxyReq.setHeader('x-user-email', req.user.email);
+                    proxyReq.setHeader('x-user-email', req.user.email || '');
                 }
-                
-                console.log(`[Gateway] Proxying ${req.method} ${req.originalUrl} to ${target}${proxyReq.path}`);
-                if (req.body && (req.method === 'POST' || req.method === 'PUT')) {
+
+                // The crucial part: handle requests with a body
+                if (req.body) {
                     const bodyData = JSON.stringify(req.body);
+                    // You must set the Content-Type and Content-Length headers
                     proxyReq.setHeader('Content-Type', 'application/json');
                     proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
+                    // And then write the data to the proxy request stream
                     proxyReq.write(bodyData);
                 }
+            },
+            // Add error handling for robustness
+            error: (err, req, res) => {
+                console.error('[Gateway] Proxy error:', err);
+                res.status(500).send('Proxy Error');
             }
         }
-    }));
+    };
+
+    const proxy = createProxyMiddleware(proxyOptions);
+
+    if (isProtected) {
+        // For protected routes, run the auth check middleware first
+        app.use(route, (req, res, next) => {
+            if (!req.user) {
+                console.log(`[Gateway] -> BLOCKED Unauthenticated request to protected route ${req.originalUrl}`);
+                return res.status(401).json({ success: false, message: 'Unauthorized: You must be logged in.' });
+            }
+            next();
+        }, proxy);
+    } else {
+        // For public routes, just use the proxy
+        app.use(route, proxy);
+    }
 });
 
 // Start the server
