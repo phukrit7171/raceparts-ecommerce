@@ -5,6 +5,7 @@ A modern, full-stack automotive accessories e-commerce platform built with micro
 ## 🚀 Features
 
 ### 🛍️ Customer Features
+
 - **Product Catalog**: Browse automotive parts by categories
 - **Advanced Search**: Search products by name, description, and specifications
 - **Shopping Cart**: Add/remove items with real-time updates
@@ -14,6 +15,7 @@ A modern, full-stack automotive accessories e-commerce platform built with micro
 - **Order History**: Track past purchases and order status
 
 ### 👨‍💼 Admin Features
+
 - **Product Management**: CRUD operations for products and categories
 - **Order Management**: View and update order statuses
 - **User Management**: Manage customer accounts
@@ -24,6 +26,7 @@ A modern, full-stack automotive accessories e-commerce platform built with micro
 ## 🏗️ Architecture
 
 ### Tech Stack
+
 - **Frontend**: SvelteKit + Bootstrap 5 + Start Bootstrap Shop Template
 - **Backend**: Node.js + Express.js (Microservices)
 - **Database**: SQLite + Sequelize ORM
@@ -34,7 +37,8 @@ A modern, full-stack automotive accessories e-commerce platform built with micro
 - **API**: RESTful with Axios
 
 ### Microservices Architecture
-```
+
+```text
 Frontend (SvelteKit) → API Gateway → Microservices
                                    ├── Auth Service
                                    ├── Product Service
@@ -45,7 +49,7 @@ Frontend (SvelteKit) → API Gateway → Microservices
 
 ## 📁 Project Structure
 
-```
+```text
 raceparts-ecommerce/
 ├── 📄 docker-compose.yml          # Container orchestration
 ├── 📄 .env.example               # Environment variables template
@@ -99,17 +103,20 @@ raceparts-ecommerce/
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18+ 
+
+- Node.js 18+
 - Docker & Docker Compose
 - Git
 
 ### 1. Clone Repository
+
 ```bash
-git clone https://github.com/phukrit 7171/raceparts-ecommerce.git
+git clone https://github.com/phukrit7171/raceparts-ecommerce.git
 cd raceparts-ecommerce
 ```
 
 ### 2. Environment Setup
+
 ```bash
 # Copy environment template
 cp .env.example .env
@@ -119,6 +126,7 @@ nano .env
 ```
 
 ### 3. Environment Variables
+
 ```env
 # Database
 DATABASE_URL=sqlite:./database/raceparts.db
@@ -150,6 +158,7 @@ ADMIN_PASSWORD=admin123
 ```
 
 ### 4. Docker Development
+
 ```bash
 # Build and start all services
 docker-compose up --build
@@ -165,6 +174,7 @@ docker-compose down
 ```
 
 ### 5. Manual Development
+
 ```bash
 # Install all dependencies
 npm run install-all
@@ -178,59 +188,59 @@ npm run dev
 
 # Or start services individually
 npm run dev:gateway    # API Gateway (Port 3000)
-npm run dev:auth      # Auth Service (Port 3001)
-npm run dev:products  # Product Service (Port 3002)
-npm run dev:cart      # Cart Service (Port 3003)
-npm run dev:payment   # Payment Service (Port 3004)
-npm run dev:admin     # Admin Service (Port 3005)
-npm run dev:frontend  # Frontend (Port 5173)
+npm run dev:auth       # Auth Service (Port 3001)
+npm run dev:products   # Product Service (Port 3002)
+npm run dev:cart       # Cart Service (Port 3003)
+npm run dev:payment    # Payment Service (Port 3004)
+npm run dev:admin      # Admin Service (Port 3005)
+npm run dev:frontend   # Frontend (Port 5173)
 ```
 
 ## 📱 Application URLs
 
-| Service | URL | Description |
-|---------|-----|-------------|
-| **Frontend** | http://localhost:5173 | Main e-commerce website |
-| **API Gateway** | http://localhost:3000 | API endpoints |
-| **Admin Panel** | http://localhost:3005/admin | AdminJS dashboard |
-| **Auth Service** | http://localhost:3001 | Authentication API |
-| **Product Service** | http://localhost:3002 | Product management API |
-| **Cart Service** | http://localhost:3003 | Shopping cart API |
-| **Payment Service** | http://localhost:3004 | Payment processing API |
+| Service            | URL                          | Description               |
+|--------------------|-----------------------------|---------------------------|
+| **API Gateway**    | <http://localhost:3000>        | API endpoints             |
+| **Frontend**       | <http://localhost:5173>        | Main e-commerce website   |
+| **Admin Panel**    | <http://localhost:3005/admin>  | AdminJS dashboard         |
+| **Auth Service**   | <http://localhost:3001>        | Authentication API        |
+| **Product Service**| <http://localhost:3002>        | Product management API    |
+| **Cart Service**   | <http://localhost:3003>        | Shopping cart API         |
+| **Payment Service**| <http://localhost:3004>        | Payment processing API    |
 
 ## 🔧 Development Commands
 
 ```bash
 # Package Management
 npm run install-all          # Install all dependencies
-npm run clean               # Clean node_modules and locks
+npm run clean                # Clean node_modules and locks
 
 # Database
-npm run db:migrate          # Run migrations
-npm run db:seed            # Seed sample data
-npm run db:reset           # Reset database
+npm run db:migrate           # Run migrations
+npm run db:seed              # Seed sample data
+npm run db:reset             # Reset database
 
 # Development
-npm run dev                # Start all services
-npm run dev:frontend       # Start frontend only
-npm run dev:backend        # Start backend services only
+npm run dev                  # Start all services
+npm run dev:frontend         # Start frontend only
+npm run dev:backend          # Start backend services only
 
 # Testing
-npm run test               # Run all tests
-npm run test:unit          # Unit tests only
-npm run test:integration   # Integration tests only
-npm run test:e2e          # End-to-end tests
+npm run test                 # Run all tests
+npm run test:unit            # Unit tests only
+npm run test:integration     # Integration tests only
+npm run test:e2e             # End-to-end tests
 
 # Production
-npm run build             # Build all services
-npm run start             # Start production build
-npm run prod              # Production with PM2
+npm run build                # Build all services
+npm run start                # Start production build
+npm run prod                 # Production with PM2
 
 # Docker
-npm run docker:build      # Build Docker images
-npm run docker:up         # Start containers
-npm run docker:down       # Stop containers
-npm run docker:logs       # View logs
+npm run docker:build         # Build Docker images
+npm run docker:up            # Start containers
+npm run docker:down          # Stop containers
+npm run docker:logs          # View logs
 ```
 
 ## 🔒 Security Features
@@ -248,12 +258,14 @@ npm run docker:logs       # View logs
 ## 💳 Payment Integration
 
 ### Stripe Setup
-1. Create Stripe account at https://stripe.com
+
+1. Create Stripe account at [https://stripe.com](https://stripe.com)
 2. Get API keys from Dashboard
 3. Add keys to `.env` file
 4. Configure webhooks for order updates
 
 ### Supported Payment Methods
+
 - Credit/Debit Cards (Visa, MasterCard, American Express)
 - Digital Wallets (Apple Pay, Google Pay)
 - Bank Transfers (ACH, SEPA)
@@ -261,6 +273,7 @@ npm run docker:logs       # View logs
 ## 📊 Database Schema
 
 ### Core Tables
+
 - **users**: Customer and admin accounts
 - **categories**: Product categories
 - **products**: Product catalog
@@ -269,6 +282,7 @@ npm run docker:logs       # View logs
 - **order_items**: Order line items
 
 ### Key Relationships
+
 - Users have many cart items and orders
 - Products belong to categories
 - Orders contain multiple order items
@@ -279,10 +293,12 @@ npm run docker:logs       # View logs
 Access the admin panel at `http://localhost:3005/admin`
 
 **Default Admin Credentials:**
+
 - Email: `admin@raceparts.com`
 - Password: `admin123`
 
 ### Admin Features
+
 - **Dashboard**: Sales overview and analytics
 - **Products**: Add, edit, delete products
 - **Categories**: Manage product categories
@@ -293,6 +309,7 @@ Access the admin panel at `http://localhost:3005/admin`
 ## 🧪 Testing
 
 ### Unit Tests
+
 ```bash
 # Run all unit tests
 npm run test:unit
@@ -305,6 +322,7 @@ npm run test:payment
 ```
 
 ### Integration Tests
+
 ```bash
 # API integration tests
 npm run test:integration
@@ -314,6 +332,7 @@ npm run test:db
 ```
 
 ### End-to-End Tests
+
 ```bash
 # Full user journey tests
 npm run test:e2e
@@ -326,6 +345,7 @@ npm run test:auth-flow
 ## 🚀 Deployment
 
 ### Production Environment
+
 ```bash
 # Build production images
 docker-compose -f docker-compose.prod.yml build
@@ -338,6 +358,7 @@ docker-compose -f docker-compose.prod.yml up -d --scale product-service=3
 ```
 
 ### Environment Setup
+
 1. Set production environment variables
 2. Configure SSL certificates
 3. Setup reverse proxy (Nginx)
@@ -358,7 +379,8 @@ docker-compose -f docker-compose.prod.yml up -d --scale product-service=3
 
 ### Common Issues
 
-**Database Connection Error**
+### Database Connection Error
+
 ```bash
 # Check database file permissions
 ls -la database/
@@ -366,7 +388,8 @@ ls -la database/
 npm run db:reset
 ```
 
-**Port Already in Use**
+#### Port Already in Use
+
 ```bash
 # Find process using port
 lsof -i :3000
@@ -374,7 +397,8 @@ lsof -i :3000
 kill -9 <PID>
 ```
 
-**Docker Issues**
+#### Docker Issues
+
 ```bash
 # Clean Docker cache
 docker system prune -a
@@ -382,7 +406,8 @@ docker system prune -a
 docker-compose up --build --force-recreate
 ```
 
-**Stripe Webhook Issues**
+#### Stripe Webhook Issues
+
 ```bash
 # Test webhook locally with Stripe CLI
 stripe listen --forward-to localhost:3004/webhook
@@ -397,6 +422,7 @@ stripe listen --forward-to localhost:3004/webhook
 5. Open Pull Request
 
 ### Development Guidelines
+
 - Follow ESLint configuration
 - Write tests for new features
 - Update documentation
@@ -411,7 +437,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Documentation**: Check this README and inline code comments
 - **Issues**: Submit GitHub issues for bugs and feature requests
 - **Community**: Join our Discord server for discussions
-- **Email**: support@raceparts.com
+- **Email**: <support@raceparts.com>
 
 ## 🙏 Acknowledgments
 
@@ -426,20 +452,25 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📸 Screenshots
 
 ### Homepage
+
 ![Homepage](docs/screenshots/homepage.png)
 
 ### Product Catalog
+
 ![Products](docs/screenshots/products.png)
 
 ### Shopping Cart
+
 ![Cart](docs/screenshots/cart.png)
 
 ### Checkout Process
+
 ![Checkout](docs/screenshots/checkout.png)
 
 ### Admin Panel
+
 ![Admin](docs/screenshots/admin.png)
 
 ---
 
-**Built with ❤️ for the automotive community**
+## Built with ❤️ for the automotive community
