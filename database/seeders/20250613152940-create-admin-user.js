@@ -1,19 +1,21 @@
-"use strict";
-const { scrypt, randomBytes } = require("node:crypto"); // Use built-in crypto
-const { promisify } = require("node:util");
-const { v4: uuidv4 } = require("uuid");
+// database/seeders/...-create-admin-user.js
+'use strict';
 
-const scryptAsync = promisify(scrypt);
+// THIS IS THE FIX
+require('dotenv').config({ path: '../.env' });
+
+const bcrypt = require('bcryptjs');
+const { v4: uuidv4 } = require('uuid');
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    const email = process.env.ADMIN_EMAIL || "admin@raceparts.com";
-    const password = process.env.ADMIN_PASSWORD || "admin123";
+    // These will now correctly read from your .env file
+    const email = process.env.ADMIN_EMAIL || 'admin@raceparts.com';
+    const password = process.env.ADMIN_PASSWORD || 'admin123';
+    
+    console.log(`[Seeder] Preparing to create admin user: ${email} with password: ${password}`);
 
-    // Hashing the password with crypto.scrypt
-    const salt = randomBytes(16).toString("hex");
-    const derivedKey = await scryptAsync(password, salt, 64);
-    const hashedPassword = `${salt}:${derivedKey.toString("hex")}`; // Store as salt:hash
+    const hashedPassword = await bcrypt.hash(password, 12);
 
     const users = await queryInterface.sequelize.query(
       `SELECT * FROM users WHERE email = '${email}'`,
@@ -21,28 +23,26 @@ module.exports = {
     );
 
     if (users.length === 0) {
-      await queryInterface.bulkInsert(
-        "users",
-        [
-          {
-            uuid: uuidv4(),
-            email: email,
-            password: hashedPassword,
-            first_name: "Admin",
-            last_name: "User",
-            role: "admin"
-          },
-        ],
-        {}
-      );
-      console.log(`Admin user '${email}' created.`);
+      await queryInterface.bulkInsert('users', [{
+        uuid: uuidv4(),
+        email: email,
+        password: hashedPassword,
+        first_name: 'Admin',
+        last_name: 'User',
+        role: 'admin',
+      }], {});
+      console.log(`[Seeder] Admin user '${email}' created successfully.`);
     } else {
-      console.log(`Admin user '${email}' already exists. Skipping.`);
+      console.log(`[Seeder] Admin user '${email}' already exists. Forcing password update.`);
+      // If user exists, let's just update the password to be sure it's correct
+      await queryInterface.sequelize.query(
+        `UPDATE users SET password = '${hashedPassword}' WHERE email = '${email}'`
+      );
     }
   },
 
   down: async (queryInterface, Sequelize) => {
-    const email = process.env.ADMIN_EMAIL || "admin@raceparts.com";
-    await queryInterface.bulkDelete("users", { email: email }, {});
-  },
+    const email = process.env.ADMIN_EMAIL || 'admin@raceparts.com';
+    await queryInterface.bulkDelete('users', { email: email }, {});
+  }
 };

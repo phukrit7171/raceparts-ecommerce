@@ -1,5 +1,6 @@
 // backend/payment-service/src/app.js
-require('dotenv').config({ path: '../../.env' });
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '..', '..', '..', '.env') });
 const express = require('express');
 const { sequelize } = require('./models');
 const paymentController = require('./controllers/paymentController');
@@ -16,7 +17,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Protected routes
-app.post('/create-payment-intent', extractUser, paymentController.createPaymentIntent);
+app.post('/create-checkout-session', extractUser, paymentController.createCheckoutSession);
 
 // Health check
 app.get('/health', (req, res) => res.status(200).json({ status: 'UP' }));
