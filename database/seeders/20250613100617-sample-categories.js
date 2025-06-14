@@ -1,4 +1,5 @@
 "use strict";
+require("dotenv").config({ path: require("path").join(__dirname, "../../.env") });
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     const categories = [

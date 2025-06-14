@@ -1,0 +1,91 @@
+services:
+  # --- Backend Services ---
+  # All backend services follow the same pattern:
+  # - build: Points to the directory with the Dockerfile.
+  # - command: Overrides the Dockerfile's CMD to run nodemon for hot-reloading.
+  # - volumes: Mounts the local source code directly into the container.
+  # - env_file: Injects all variables from our .env file.
+
+  api-gateway:
+    build: ./backend/api-gateway
+    command: npm run dev
+    ports:
+      # Expose the API Gateway to your local machine (host:container)
+      - "${API_GATEWAY_PORT}:${API_GATEWAY_PORT}"
+    volumes:
+      - ./backend/api-gateway/src:/app/src
+      - /app/node_modules # Prevents host node_modules from overwriting container's
+      - ./database:/app/database # Mount the shared SQLite database directory
+    env_file: .env
+    restart: unless-stopped
+
+  auth-service:
+    build: ./backend/auth-service
+    command: npm run dev
+    volumes:
+      - ./backend/auth-service/src:/app/src
+      - /app/node_modules
+      - ./database:/app/database
+    env_file: .env
+    restart: unless-stopped
+    # No ports exposed; communication happens over the internal Docker network.
+
+  product-service:
+    build: ./backend/product-service
+    command: npm run dev
+    volumes:
+      - ./backend/product-service/src:/app/src
+      - /app/node_modules
+      - ./database:/app/database
+    env_file: .env
+    restart: unless-stopped
+
+  cart-service:
+    build: ./backend/cart-service
+    command: npm run dev
+    volumes:
+      - ./backend/cart-service/src:/app/src
+      - /app/node_modules
+      - ./database:/app/database
+    env_file: .env
+    restart: unless-stopped
+
+  payment-service:
+    build: ./backend/payment-service
+    command: npm run dev
+    volumes:
+      - ./backend/payment-service/src:/app/src
+      - /app/node_modules
+      - ./database:/app/database
+    env_file: .env
+    restart: unless-stopped
+
+  admin-service:
+    build: ./backend/admin-service
+    command: npm run dev
+    ports:
+      # Expose the admin panel for direct access during development
+      - "${ADMIN_SERVICE_PORT}:${ADMIN_SERVICE_PORT}"
+    volumes:
+      - ./backend/admin-service/src:/app/src
+      - /app/node_modules
+      - ./database:/app/database
+    env_file: .env
+    restart: unless-stopped
+
+  # --- Frontend Service ---
+  frontend:
+    build: ./frontend
+    command: npm run dev
+    ports:
+      # Expose the SvelteKit dev server to your local machine
+      - "${FRONTEND_PORT}:${FRONTEND_PORT}"
+    volumes:
+      # Mount the entire frontend directory to enable Vite's HMR (Hot Module Replacement)
+      - ./frontend:/app
+      - /app/node_modules # Isolate container node_modules
+    env_file: .env
+    restart: unless-stopped
+    depends_on:
+      # This is optional but can help ensure the backend is ready before the frontend starts
+      - api-gateway
