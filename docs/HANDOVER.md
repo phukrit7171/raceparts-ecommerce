@@ -30,26 +30,26 @@ The application is architected as a set of independent microservices that commun
 ```mermaid
 graph TD
     subgraph "Browser (Client)"
-        UI[SvelteKit Frontend<br/>(Port: 5173)]
+        UI["SvelteKit Frontend<br/>(Port: 5173)"]
     end
 
     UI --> |HTTP Requests| GW
 
     subgraph "API & Routing Layer"
-        GW[API Gateway (Express.js)<br/>(Port: 3000)<br/>- CORS & Rate Limiting<br/>- Authentication Check<br/>- Request Routing]
+        GW["API Gateway (Express.js)<br/>(Port: 3000)<br/>- CORS & Rate Limiting<br/>- Authentication Check<br/>- Request Routing"]
     end
 
-    GW -->|/api/auth/*| AUTH[Auth Service<br/>(Port: 3001)]
-    GW -->|/api/products/*| PROD[Product Service<br/>(Port: 3002)]
-    GW -->|/api/cart/*| CART[Cart Service<br/>(Port: 3003)]
-    GW -->|/api/payment/*| PAY[Payment Service<br/>(Port: 3004)]
+    GW -->|/api/auth/*| AUTH["Auth Service<br/>(Port: 3001)"]
+    GW -->|/api/products/*| PROD["Product Service<br/>(Port: 3002)"]
+    GW -->|/api/cart/*| CART["Cart Service<br/>(Port: 3003)"]
+    GW -->|/api/payment/*| PAY["Payment Service<br/>(Port: 3004)"]
 
     subgraph "Backend Microservices (Node.js/Express.js)"
         AUTH
         PROD
         CART
         PAY
-        ADMIN[Admin Service (AdminJS)<br/>(Port: 3005)<br/>Direct Access]
+        ADMIN["Admin Service (AdminJS)<br/>(Port: 3005)<br/>Direct Access"]
     end
     
     subgraph "Shared Resources"
@@ -57,7 +57,7 @@ graph TD
     end
 
     subgraph "External Services"
-        STRIPE[Stripe API]
+        STRIPE["Stripe API"]
     end
     
     AUTH --> DB
