@@ -51,7 +51,7 @@ exports.createCheckoutSession = async (req, res) => {
             payment_method_types: ['card','promptpay'],
             line_items: line_items,
             mode: 'payment',
-            success_url: `${origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+            success_url: `${origin}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${origin}/cart`,
             metadata: { userId: userId.toString() },
             shipping_address_collection: { allowed_countries: ['US', 'CA', 'GB','TH'] },

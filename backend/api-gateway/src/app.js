@@ -17,17 +17,24 @@ const whitelist = [
     'http://localhost:5173',
     'http://localhost:5174', // dev fallback when default port is busy
     'http://localhost:5175', // dev fallback when default port is busy
+    'http://172.20.128.1:5173' // Docker container IP address
 ];
 const corsOptions = {
     origin: function (origin, callback) {
-        // Allow requests from any whitelisted origin or any localhost:* during development
-        if (!origin || whitelist.includes(origin) || origin.startsWith('http://localhost')) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
+        // Allow requests with no origin (like mobile apps, curl, postman)
+        if (!origin) return callback(null, true);
+        
+        // Check if origin is in whitelist or is a localhost URL
+        if (whitelist.includes(origin) || 
+            origin.startsWith('http://localhost') || 
+            origin.startsWith('http://172.20.128.1')) {
+            return callback(null, true);
         }
+        
+        console.log('Not allowed by CORS:', origin);
+        callback(new Error('Not allowed by CORS'));
     },
-    credentials: true,
+    credentials: true, // This is required for cookies/authorization headers with credentials
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: [
         'Content-Type',
@@ -35,23 +42,61 @@ const corsOptions = {
         'X-Requested-With',
         'Accept',
         'Origin',
-        'X-XSRF-TOKEN'
+        'X-XSRF-TOKEN',
+        'x-access-token',
+        'credentials',
+        'withCredentials'
     ],
-    exposedHeaders: ['set-cookie'],
-    optionsSuccessStatus: 200
+    exposedHeaders: [
+        'set-cookie',
+        'access-control-allow-credentials',
+        'access-control-allow-origin',
+        'access-control-allow-methods',
+        'access-control-allow-headers',
+        'access-control-allow-origin',
+        'access-control-allow-methods'
+    ],
+    optionsSuccessStatus: 200,
+    preflightContinue: false
 };
 
-// Middleware
+// Apply CORS middleware
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions)); // Enable preflight for all routes
 
-// After CORS, explicitly echo back the requesting origin (needed when credentials=true)
+// Handle CORS headers for all responses
 app.use((req, res, next) => {
     const origin = req.headers.origin;
-    if (origin && origin.startsWith('http://localhost')) {
-        res.setHeader('Access-Control-Allow-Origin', origin);
-        res.setHeader('Vary', 'Origin');
+    
+    // Check if the origin is allowed
+    if (origin) {
+        const isAllowed = whitelist.includes(origin) || 
+                        origin.startsWith('http://localhost') || 
+                        origin.startsWith('http://172.20.128.1');
+        
+        if (isAllowed) {
+            // Set the Access-Control-Allow-Origin header to the exact origin that made the request
+            res.header('Access-Control-Allow-Origin', origin);
+            res.header('Access-Control-Allow-Credentials', 'true');
+            res.header('Vary', 'Origin');
+            
+            // Handle preflight requests
+            if (req.method === 'OPTIONS') {
+                res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+                res.header('Access-Control-Allow-Headers', corsOptions.allowedHeaders.join(','));
+                return res.status(200).end();
+            }
+            
+            return next();
+        }
     }
+    
+    // If we get here, either no origin was provided or it's not allowed
+    if (req.method === 'OPTIONS') {
+        // Still respond to OPTIONS with 200 OK, but without CORS headers
+        return res.status(200).end();
+    }
+    
     next();
 });
 app.use(helmet());
@@ -87,17 +132,24 @@ app.get('/health', (req, res) => {
 const services = [
     {
         route: '/api/auth',
-        target: `http://localhost:${process.env.AUTH_SERVICE_PORT || 3001}`
+        target: `http://localhost:${process.env.AUTH_SERVICE_PORT || 3001}`,
+        protected: false // Auth routes are public
     },
-
-    { 
-        route: '/api/products', 
-        target: `http://localhost:${process.env.PRODUCT_SERVICE_PORT || 3002}` 
+    {
+        route: '/api/products',
+        target: `http://localhost:${process.env.PRODUCT_SERVICE_PORT || 3002}`,
+        protected: false,
+        pathRewrite: {
+            '^/api/products/categories': '/categories',
+            '^/api/products/slug/(.*)': '/products/slug/$1',
+            '^/api/products/(?!categories|slug)': '/products/$1',
+            '^/api/products$': ''
+        }
     },
-    { 
-        route: '/api/cart', 
+    {
+        route: '/api/cart',
         target: `http://localhost:${process.env.CART_SERVICE_PORT || 3003}`,
-        protected: true // Example of a protected route is protected and requires authentication
+        protected: true // Cart operations require authentication
     },
     {
         route: '/api/payment',
@@ -107,19 +159,34 @@ const services = [
 ];
 
 // Set up proxies for each service
-services.forEach(({ route, target, protected: isProtected }) => {
+services.forEach(({ route, target, protected: isProtected, pathRewrite }) => {
 
     const proxyOptions = {
         target,
         changeOrigin: true,
-        pathRewrite: { [`^${route}`]: '' },
+        pathRewrite: pathRewrite || { [`^${route}`]: '' },
         on: {
             proxyRes: (proxyRes, req, res) => {
                 const origin = req.headers.origin;
-                if (origin && origin.startsWith('http://localhost')) {
+                if (origin) {
                     proxyRes.headers['Access-Control-Allow-Origin'] = origin;
                     proxyRes.headers['Access-Control-Allow-Credentials'] = 'true';
                     proxyRes.headers['Vary'] = 'Origin';
+                    
+                    // Ensure cookies are properly set
+                    if (proxyRes.headers['set-cookie']) {
+                        const cookies = Array.isArray(proxyRes.headers['set-cookie']) 
+                            ? proxyRes.headers['set-cookie'] 
+                            : [proxyRes.headers['set-cookie']];
+                            
+                        proxyRes.headers['set-cookie'] = cookies.map(cookie => {
+                            return cookie
+                                .split(';')
+                                .filter(v => v.trim().toLowerCase() !== 'secure' && !v.trim().toLowerCase().startsWith('samesite='))
+                                .join(';')
+                                .concat('; SameSite=None');
+                        });
+                    }
                 }
             },
             proxyReq: (proxyReq, req, res) => {

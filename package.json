@@ -13,6 +13,7 @@
     "dev:payment": "cd backend/payment-service && npm run dev",
     "dev:admin": "cd backend/admin-service && npm run dev",
     "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "concurrently \"npm run dev:gateway\" \"npm run dev:auth\" \"npm run dev:products\" \"npm run dev:cart\" \"npm run dev:payment\" \"npm run dev:admin\"",
     "build": "cd frontend && npm run build",
     "db:migrate": "npx sequelize-cli db:migrate",
     "db:seed": "npx sequelize-cli db:seed:all",
