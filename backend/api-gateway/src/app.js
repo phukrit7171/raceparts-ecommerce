@@ -16,6 +16,7 @@ const app = express();
 const whitelist = [
     'http://localhost:5173',
     'http://localhost:5174', // dev fallback when default port is busy
+    'http://localhost:5175', // dev fallback when default port is busy
 ];
 const corsOptions = {
     origin: function (origin, callback) {
