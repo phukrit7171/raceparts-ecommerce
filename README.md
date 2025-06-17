@@ -2,9 +2,9 @@
 
 A modern, full-stack automotive accessories e-commerce platform built with microservices architecture and containerized deployment.
 
-## 🚀 Features
+## 🚀 Current Features
 
-### 🛍️ Customer Features
+### 🛍️ Customer Features (Available Now)
 
 - **Product Catalog**: Browse automotive parts by categories
 - **Advanced Search**: Search products by name, description, and specifications
@@ -14,7 +14,7 @@ A modern, full-stack automotive accessories e-commerce platform built with micro
 - **Responsive Design**: Mobile-first Bootstrap 5 interface
 - **Order History**: Track past purchases and order status
 
-### 👨‍💼 Admin Features
+### 👨‍💼 Admin Features (Available Now)
 
 - **Product Management**: CRUD operations for products and categories
 - **Order Management**: View and update order statuses
@@ -22,6 +22,18 @@ A modern, full-stack automotive accessories e-commerce platform built with micro
 - **Inventory Tracking**: Monitor stock levels
 - **Sales Analytics**: Dashboard with sales insights
 - **Bulk Operations**: Mass product updates and imports
+
+## 🛣️ Future Features
+
+- **Wishlist**: Save favorite products for later purchase
+- **Product Reviews & Ratings**: User-generated feedback on items
+- **Real-time Chat Support**: Instant assistance for customers
+- **Multi-language & Currency**: Globalization support
+- **ElasticSearch Integration**: Lightning-fast, scalable search
+- **Micro-frontend Deployment**: Independent deploys per domain
+- **Service Mesh (Istio)**: Advanced traffic management & observability
+
+---
 
 ## 🏗️ Architecture
 

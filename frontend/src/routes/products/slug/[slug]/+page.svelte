@@ -20,11 +20,11 @@
   <div class="row">
     <div class="col-md-6">
       <img 
-        src={data.product.images?.[0] || '/placeholder.jpg'} 
+        src={data.product.images?.[0] || 'https://placehold.co/600x400?text=No+Image'} 
         alt={data.product.name} 
         class="img-fluid"
         style="max-height: 400px; object-fit: contain;"
-        on:error={(e) => e.target.src = '/placeholder.jpg'}
+        on:error={(e) => e.currentTarget.src = 'https://placehold.co/600x400?text=No+Image'}
       />
     </div>
     <div class="col-md-6">

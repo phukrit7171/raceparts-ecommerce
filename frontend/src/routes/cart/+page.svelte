@@ -1,11 +1,15 @@
 <script>
-  import { cart } from '$lib/stores/cart.js';
+  import { cart, cartTotal } from '$lib/stores/cart.js';
   import api from '$lib/api.js';
   import Swal from 'sweetalert2';
 
   async function updateQuantity(item, newQuantity) {
     try {
-      const res = await api.put(`/api/cart/${item.id}`, { quantity: newQuantity });
+      // optimistic UI update
+      const updatedItems = $cart.items.map(ci => ci.id === item.id ? { ...ci, quantity: newQuantity } : ci);
+      cart.set({ ...$cart, items: updatedItems });
+
+      const res = await api.patch(`/api/cart/${item.id}`, { quantity: newQuantity });
       if (res.data.success) {
         cart.set(res.data.data);
         Swal.fire({
@@ -32,14 +36,15 @@
       <div class="col-md-6">
         <div class="card mb-3">
           <div class="card-body">
-            <h5>{item.product.name}</h5>
-            <p>${item.product.price}</p>
+            
+            <h5>{(item.product ?? item.Product)?.name ?? 'Unknown product'}</h5>
+            <p>${(item.product ?? item.Product)?.price ?? item.price ?? 0}</p>
             <input type="number" bind:value={item.quantity} min="1" on:change={() => updateQuantity(item, item.quantity)} />
           </div>
         </div>
       </div>
     {/each}
   </div>
-  <h4>Total: ${$cart.totalPrice}</h4>
+  <h4>Total: ${$cartTotal}</h4>
   <a href="/payment" class="btn btn-success">Proceed to Checkout</a>
 {/if}

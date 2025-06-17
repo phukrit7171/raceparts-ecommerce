@@ -4,7 +4,7 @@ import { writable } from 'svelte/store';
 const defaultFilters = {
   category: '',
   minPrice: 0,
-  maxPrice: 1000,
+  maxPrice: null,
   sortBy: 'name',
   sortOrder: 'asc'
 };

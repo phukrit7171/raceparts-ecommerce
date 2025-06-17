@@ -18,7 +18,11 @@ import { cart } from '$lib/stores/cart.js';
             user.set(data.user);
         }
         if (data?.cart) {
-            cart.set({ items: data.cart, totalPrice: data.cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0) });
+            const total = data.cart.reduce((sum, item) => {
+                const price = item.product?.price ?? item.Product?.price ?? item.price ?? 0;
+                return sum + price * (item.quantity ?? 1);
+            }, 0);
+            cart.set({ items: data.cart, totalPrice: total });
         }
     }
     

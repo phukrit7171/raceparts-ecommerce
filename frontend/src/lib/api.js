@@ -18,10 +18,13 @@ api.interceptors.response.use(response => {
 }, error => {
     // Handle common error scenarios
     if (error.response && error.response.status === 401) {
-        // Only redirect if not already on the login page
-        if (!window.location.pathname.startsWith('/auth/login') && !window.location.pathname.startsWith('/auth/register')) {
-            console.log('Authentication required, redirecting to login');
-            window.location.href = '/auth/login';
+        // Only attempt client-side redirect when in browser environment
+        if (typeof window !== 'undefined') {
+            const currentPath = window.location.pathname;
+            if (!currentPath.startsWith('/auth/login') && !currentPath.startsWith('/auth/register')) {
+                console.log('Authentication required, redirecting to login');
+                window.location.href = '/auth/login';
+            }
         }
     }
     return Promise.reject(error);

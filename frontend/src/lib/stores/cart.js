@@ -26,6 +26,11 @@ export const cartCount = derived(cart, ($c) =>
   $c.items.reduce((s, i) => s + i.quantity, 0)
 );
 
+// Total price derived
+export const cartTotal = derived(cart, ($c) =>
+  $c.items.reduce((sum, i) => sum + (((i.product ?? i.Product)?.price ?? i.price ?? 0) * i.quantity), 0)
+);
+
 // Re-export helper functions
 export async function fetchCart() {
   try {

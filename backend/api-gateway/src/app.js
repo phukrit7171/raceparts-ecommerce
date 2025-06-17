@@ -13,10 +13,14 @@ const jwt = require('jsonwebtoken');
 const app = express();
 
 // CORS Configuration
-const whitelist = ['http://localhost:5173'];
+const whitelist = [
+    'http://localhost:5173',
+    'http://localhost:5174', // dev fallback when default port is busy
+];
 const corsOptions = {
     origin: function (origin, callback) {
-        if (!origin || whitelist.indexOf(origin) !== -1) {
+        // Allow requests from any whitelisted origin or any localhost:* during development
+        if (!origin || whitelist.includes(origin) || origin.startsWith('http://localhost')) {
             callback(null, true);
         } else {
             callback(new Error('Not allowed by CORS'));
@@ -39,6 +43,16 @@ const corsOptions = {
 // Middleware
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions)); // Enable preflight for all routes
+
+// After CORS, explicitly echo back the requesting origin (needed when credentials=true)
+app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    if (origin && origin.startsWith('http://localhost')) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+        res.setHeader('Vary', 'Origin');
+    }
+    next();
+});
 app.use(helmet());
 app.use(morgan('dev')); // Logger for incoming requests
 app.use(cookieParser()); // Use cookie parser to read JWT from cookies
@@ -99,6 +113,14 @@ services.forEach(({ route, target, protected: isProtected }) => {
         changeOrigin: true,
         pathRewrite: { [`^${route}`]: '' },
         on: {
+            proxyRes: (proxyRes, req, res) => {
+                const origin = req.headers.origin;
+                if (origin && origin.startsWith('http://localhost')) {
+                    proxyRes.headers['Access-Control-Allow-Origin'] = origin;
+                    proxyRes.headers['Access-Control-Allow-Credentials'] = 'true';
+                    proxyRes.headers['Vary'] = 'Origin';
+                }
+            },
             proxyReq: (proxyReq, req, res) => {
                 console.log(`[Gateway] -> PROXYING ${req.method} ${req.originalUrl} to ${target}${proxyReq.path}`);
 
