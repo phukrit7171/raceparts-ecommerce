@@ -1,27 +1,28 @@
 // frontend/src/routes/+page.server.js
-import api from '$lib/api';
+import { api } from '$lib/api';
 
-export async function load() {
-    console.log('[Homepage Server] Loading products...');
+/** @type {import('./$types').PageServerLoad} */
+export async function load({ fetch }) {
     try {
-        const response = await api.get('/api/products');
-        
-        if (response.status === 200 && response.data.success) {
-             console.log('[Homepage Server] API call successful. Returning products.');
-            return {
-                products: response.data.data,
-                pagination: response.data.pagination
-            };
-        }
-        
-        console.error('[Homepage Server] API returned a non-successful response:', response.data);
-        return { products: [], error: 'Failed to load products.' };
+        // Fetch products and categories in parallel
+        const [productsRes, categoriesRes] = await Promise.all([
+            api.get('/api/products?limit=50'),
+            api.get('/api/products/categories')
+        ]);
 
-    } catch (error) {
-        console.error('[Homepage Server] CRITICAL: Could not fetch products from API.', error.message);
+        const products = productsRes.data.data || [];
+        const categories = categoriesRes.data.data || [];
+
         return {
+            products,
+            categories
+        };
+    } catch (error) {
+        console.error('Error loading page data:', error);
+        return {
+            error: 'Could not load page data. Please try again later.',
             products: [],
-            error: 'Could not connect to the server. Is it running?'
+            categories: []
         };
     }
 }

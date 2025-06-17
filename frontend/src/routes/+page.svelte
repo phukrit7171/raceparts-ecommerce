@@ -1,29 +1,26 @@
 <!-- frontend/src/routes/+page.svelte -->
 <script>
-    import { onMount } from 'svelte';
-    import api from '$lib/api';
-    
     /** @type {import('./$types').PageData} */
     export let data;
 
-    // This is a clean way to handle the data prop from the server load function.
-    const products = data.products || [];
-    const error = data.error;
-    
-    // State for categories and grouped products
-    let categories = [];
-    let groupedProducts = new Map();
-    let loading = false;
-    
+    // Data from server load function, reactive to changes
+    $: products = data.products || [];
+    $: categories = data.categories || [];
+    $: error = data.error;
+
     // Function to group products by category
-    function groupProductsByCategory(products) {
+    function groupProductsByCategory(prods) {
         const grouped = new Map();
         
+        if (!prods || prods.length === 0) {
+            return grouped;
+        }
+
         // Create an 'All' category
-        grouped.set('All', [...products]);
+        grouped.set('All', [...prods]);
         
         // Group by category
-        products.forEach(product => {
+        prods.forEach(product => {
             const categoryName = product.category?.name || 'Uncategorized';
             if (!grouped.has(categoryName)) {
                 grouped.set(categoryName, []);
@@ -34,30 +31,8 @@
         return grouped;
     }
     
-    // Load categories and group products
-    onMount(async () => {
-        try {
-            loading = true;
-            // Fetch categories if not in data
-            if (data.categories) {
-                categories = data.categories;
-                
-            } else {
-                const res = await api.get('/api/products/categories');
-                categories = res.data.data;
-            }
-            
-            // Group products by category
-            if (products.length > 0) {
-                groupedProducts = groupProductsByCategory(products);
-            }
-            console.log(data);
-        } catch (err) {
-            console.error('Error loading categories:', err);
-        } finally {
-            loading = false;
-        }
-    });
+    // Reactive statement to group products whenever the products data changes
+    $: groupedProducts = groupProductsByCategory(products);
 </script>
 
 <!-- Header-->
@@ -75,13 +50,7 @@
     <div class="container px-4 px-lg-5 mt-5">
         {#if error}
             <div class="alert alert-danger w-100 text-center">{error}</div>
-        {:else if loading}
-            <div class="text-center">
-                <div class="spinner-border" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-            </div>
-        {:else if Array.from(groupedProducts.keys()).length > 0}
+        {:else if products && products.length > 0}
             {#each Array.from(groupedProducts.entries()) as [category, categoryProducts]}
                 {#if categoryProducts.length > 0}
                     <div class="mb-5">
@@ -112,7 +81,7 @@
                                         <!-- Product actions-->
                                         <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
                                             <div class="text-center">
-                                                <a class="btn btn-outline-dark mt-auto" href="/products/slug/{product.uuid || product.slug || 'unknown'}">View options</a>
+                                                <a class="btn btn-outline-dark mt-auto" href="/products/slug/{product.slug}">View options</a>
                                             </div>
                                         </div>
                                     </div>

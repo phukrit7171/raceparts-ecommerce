@@ -1,22 +1,26 @@
 import api from '$lib/api';
 
-export async function load({ params }) {
+export async function load({ params, setHeaders }) {
   try {
-    // Try fetching by slug or UUID
-    let res = await api.get(`/api/products/${params.slug}`);
-    if (res.data.success) {
+    const { slug } = params;
+    const res = await api.get(`/api/products/slug/${slug}`);
+
+    if (res.data && res.data.success) {
+      // Cache the product page for better performance
+      setHeaders({
+        'cache-control': 'public, max-age=3600' // Cache for 1 hour
+      });
       return { product: res.data.data };
     } else {
-      // If first attempt fails, assume params.slug might be a UUID and try a different approach if backend supports it
-      res = await api.get(`/api/products/uuid/${params.slug}`);
-      if (res.data.success) {
-        return { product: res.data.data };
-      } else {
-        throw new Error('Product not found or API error');
-      }
+      // Handle cases where the API returns an error (e.g., product not found)
+      return {
+        product: null,
+        error: res.data.message || 'Could not load product data. The product may not exist.'
+      };
     }
   } catch (error) {
-    // Return a default or error state if the product fetch fails
-    return { product: null, error: 'Could not load product data' };
+    // Handle network errors or other exceptions during the API call
+    const errorMessage = error.response?.data?.message || 'A server error occurred while fetching the product.';
+    return { product: null, error: errorMessage };
   }
 }
