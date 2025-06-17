@@ -18,11 +18,8 @@ import { cart } from '$lib/stores/cart.js';
             user.set(data.user);
         }
         if (data?.cart) {
-            const total = data.cart.reduce((sum, item) => {
-                const price = item.product?.price ?? item.Product?.price ?? item.price ?? 0;
-                return sum + price * (item.quantity ?? 1);
-            }, 0);
-            cart.set({ items: data.cart, totalPrice: total });
+            // Use normalized cart structure
+            cart.set({ items: data.cart });
         }
     }
     
@@ -40,7 +37,7 @@ import { cart } from '$lib/stores/cart.js';
         try {
             await api.post('/api/auth/logout');
             user.set(null);
-            cart.set({ items: [], totalPrice: 0 });
+            cart.set({ items: [] }); // Removed totalPrice property
             Swal.fire({
                 title: 'Logged Out',
                 icon: 'success',
