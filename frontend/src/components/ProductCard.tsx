@@ -39,10 +39,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   };
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
+    const formattedPrice = new Intl.NumberFormat('th-TH', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
     }).format(price);
+    return `${formattedPrice} THB`;
   };
 
   return (

@@ -76,9 +76,9 @@ export default function ProductDetailPage() {
   };
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('th-TH', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'THB',
     }).format(price);
   };
 
