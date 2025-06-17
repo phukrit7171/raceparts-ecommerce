@@ -1,5 +1,5 @@
 // frontend/src/routes/+page.server.js
-import { api } from '$lib/api';
+import api from '$lib/api';
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ fetch }) {
