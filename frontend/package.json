@@ -23,6 +23,7 @@
 		"axios": "^1.10.0",
 		"bootstrap": "^5.3.6",
 		"dotenv": "^16.5.0",
+		"frontend": "file:",
 		"sweetalert2": "^11.22.0"
 	}
 }

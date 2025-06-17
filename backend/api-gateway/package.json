@@ -8,6 +8,7 @@
     "start": "node src/app.js"
   },
   "dependencies": {
+    "api-gateway": "file:",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
