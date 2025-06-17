@@ -23,6 +23,7 @@
       
       // Build query params
       const params = new URLSearchParams();
+      if (currentFilters.search) params.append('search', currentFilters.search);
       if (currentFilters.category) params.append('category', currentFilters.category);
       if (currentFilters.minPrice) params.append('minPrice', currentFilters.minPrice);
       if (currentFilters.maxPrice) params.append('maxPrice', currentFilters.maxPrice);
@@ -78,6 +79,10 @@
           <h5 class="mb-0">Filters</h5>
         </div>
         <div class="card-body">
+          <div class="mb-3">
+            <label class="form-label">Search</label>
+            <input type="text" class="form-control" bind:value={$filters.search}>
+          </div>
           <div class="mb-3">
             <label class="form-label">Category</label>
             <select class="form-select" bind:value={$filters.category}>
