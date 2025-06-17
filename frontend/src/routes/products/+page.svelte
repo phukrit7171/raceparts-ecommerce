@@ -39,8 +39,17 @@
         categories = catRes.data.data;
       }
     } catch (err) {
-      error = 'Failed to load products';
+      // Show backend error message if available
+      if (err.response && err.response.data && err.response.data.message) {
+        error = 'Failed to load products: ' + err.response.data.message;
+      } else {
+        error = 'Failed to load products';
+      }
+      // Log the full error and response for debugging
       console.error('Product load error:', err);
+      if (err.response) {
+        console.error('Backend response:', err.response);
+      }
     } finally {
       loading = false;
     }
