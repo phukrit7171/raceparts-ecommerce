@@ -12,11 +12,33 @@ const jwt = require('jsonwebtoken');
 
 const app = express();
 
+// CORS Configuration
+const whitelist = ['http://localhost:5173'];
+const corsOptions = {
+    origin: function (origin, callback) {
+        if (!origin || whitelist.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: [
+        'Content-Type',
+        'Authorization',
+        'X-Requested-With',
+        'Accept',
+        'Origin',
+        'X-XSRF-TOKEN'
+    ],
+    exposedHeaders: ['set-cookie'],
+    optionsSuccessStatus: 200
+};
+
 // Middleware
-app.use(cors({
-    origin: 'http://localhost:5173',
-    credentials: true
-}));
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); // Enable preflight for all routes
 app.use(helmet());
 app.use(morgan('dev')); // Logger for incoming requests
 app.use(cookieParser()); // Use cookie parser to read JWT from cookies

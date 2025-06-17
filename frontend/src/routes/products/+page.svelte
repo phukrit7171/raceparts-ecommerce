@@ -80,12 +80,12 @@
         </div>
         <div class="card-body">
           <div class="mb-3">
-            <label class="form-label">Search</label>
-            <input type="text" class="form-control" bind:value={$filters.search}>
+            <label for="search" class="form-label">Search</label>
+            <input id="search" type="text" class="form-control" bind:value={$filters.search}>
           </div>
           <div class="mb-3">
-            <label class="form-label">Category</label>
-            <select class="form-select" bind:value={$filters.category}>
+            <label for="category" class="form-label">Category</label>
+            <select id="category" class="form-select" bind:value={$filters.category}>
               <option value="">All Categories</option>
               {#each categories as category}
                 <option value={category.slug}>{category.name}</option>
@@ -97,17 +97,19 @@
             <label class="form-label">Price Range</label>
             <div class="row">
               <div class="col">
-                <input type="number" class="form-control" placeholder="Min" bind:value={$filters.minPrice}>
+                <label for="minPrice" class="visually-hidden">Min Price</label>
+                <input id="minPrice" type="number" class="form-control" placeholder="Min" bind:value={$filters.minPrice}>
               </div>
               <div class="col">
-                <input type="number" class="form-control" placeholder="Max" bind:value={$filters.maxPrice}>
+                <label for="maxPrice" class="visually-hidden">Max Price</label>
+                <input id="maxPrice" type="number" class="form-control" placeholder="Max" bind:value={$filters.maxPrice}>
               </div>
             </div>
           </div>
           
           <div class="mb-3">
-            <label class="form-label">Sort By</label>
-            <select class="form-select" bind:value={$filters.sortBy}>
+            <label for="sortBy" class="form-label">Sort By</label>
+            <select id="sortBy" class="form-select" bind:value={$filters.sortBy}>
               <option value="name">Name</option>
               <option value="price">Price</option>
               <option value="createdAt">Newest</option>
@@ -115,8 +117,8 @@
           </div>
           
           <div class="mb-3">
-            <label class="form-label">Sort Order</label>
-            <select class="form-select" bind:value={$filters.sortOrder}>
+            <label for="sortOrder" class="form-label">Sort Order</label>
+            <select id="sortOrder" class="form-select" bind:value={$filters.sortOrder}>
               <option value="asc">Ascending</option>
               <option value="desc">Descending</option>
             </select>

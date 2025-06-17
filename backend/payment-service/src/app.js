@@ -2,11 +2,21 @@
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '..', '..', '..', '.env') });
 const express = require('express');
+const cors = require('cors');
 const { sequelize } = require('./models');
 const paymentController = require('./controllers/paymentController');
 const { extractUser } = require('./middleware/auth');
 
 const app = express();
+
+// CORS Configuration
+const corsOptions = {
+    origin: 'http://localhost:5173',
+    credentials: true,
+    optionsSuccessStatus: 200
+};
+app.use(cors(corsOptions));
+
 
 // The webhook route must be registered BEFORE express.json()
 // to receive the raw body needed for signature verification.

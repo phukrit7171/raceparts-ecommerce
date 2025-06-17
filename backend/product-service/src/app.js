@@ -10,7 +10,12 @@ const productController = require('./controllers/productController');
 const app = express();
 
 // Middleware
-app.use(cors());
+const corsOptions = {
+    origin: 'http://localhost:5173',
+    credentials: true,
+    optionsSuccessStatus: 200
+};
+app.use(cors(corsOptions));
 app.use(helmet());
 app.use(express.json());
 

@@ -34,7 +34,7 @@ import { cart } from '$lib/stores/cart.js';
 
     async function handleLogout() {
         try {
-            await api.post('/auth/logout');
+            await api.post('/api/auth/logout');
             user.set(null);
             cart.set({ items: [], totalPrice: 0 });
             Swal.fire({

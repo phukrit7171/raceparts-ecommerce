@@ -2,11 +2,21 @@
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '..', '..', '..', '.env') });
 const express = require('express');
+const cors = require('cors');
 const { sequelize } = require('./models');
 const cartController = require('./controllers/cartController');
 const { extractUser } = require('./middleware/auth');
 
 const app = express();
+
+// CORS Configuration
+const corsOptions = {
+    origin: 'http://localhost:5173',
+    credentials: true,
+    optionsSuccessStatus: 200
+};
+app.use(cors(corsOptions));
+
 app.use(express.json());
 
 // Apply user extraction middleware to all routes

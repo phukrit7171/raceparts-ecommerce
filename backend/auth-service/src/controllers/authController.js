@@ -14,10 +14,16 @@ const signToken = (id) => {
 const createSendToken = (user, statusCode, res) => {
   const token = signToken(user.id);
 
+  const isProduction = process.env.NODE_ENV === 'production';
+  
   const cookieOptions = {
     expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: isProduction, // true in production, false in development
+    sameSite: isProduction ? 'none' : 'lax',
+    path: '/',
+    // Don't set domain in development to allow localhost to work
+    ...(isProduction && { domain: 'your-production-domain.com' }) // Replace with your domain
   };
 
   res.cookie('jwt', token, cookieOptions);
