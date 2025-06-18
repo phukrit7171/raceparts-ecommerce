@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import { authAPI } from '@/lib/api';
 import { useRouter, usePathname } from 'next/navigation';
+import logger from '@/utils/logger';
 
 interface User {
   id: number;
@@ -50,17 +51,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const refreshAuth = useCallback(async (): Promise<boolean> => {
     try {
+      logger.info('Refreshing authentication status');
       const response = await authAPI.me();
       setUser(response.data.user);
       setIsAuthenticated(true);
+      logger.info('Authentication refreshed successfully', { userId: response.data.user.id });
       return true;
     } catch (error) {
-      console.error('Auth refresh failed:', error);
+      logger.error('Auth refresh failed:', { error });
       setUser(null);
       setIsAuthenticated(false);
       
-      // Only redirect if not already on a public path
       if (!publicPaths.includes(pathname)) {
+        logger.info('Redirecting to login page');
         router.push('/auth/login');
       }
       return false;
@@ -72,13 +75,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string) => {
     setLoading(true);
     try {
+      logger.info('Attempting login', { email });
       const response = await authAPI.login({ email, password });
-      // Set user data immediately from the login response
       setUser(response.data.user);
       setIsAuthenticated(true);
+      logger.info('Login successful', { userId: response.data.user.id });
       router.replace('/');
     } catch (error) {
-      console.error('Login error:', error);
+      logger.error('Login failed:', { error });
       throw error;
     } finally {
       setLoading(false);
@@ -88,10 +92,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const register = async (data: RegisterData) => {
     setLoading(true);
     try {
+      logger.info('Attempting registration', { email: data.email });
       await authAPI.register(data);
-      // Remove automatic login after registration
+      logger.info('Registration successful', { email: data.email });
       return true;
     } catch (error) {
+      logger.error('Registration failed:', { error });
       throw error;
     } finally {
       setLoading(false);
@@ -101,26 +107,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = async () => {
     setLoading(true);
     try {
+      logger.info('Attempting logout', { userId: user?.id });
       await authAPI.logout();
       setUser(null);
       setIsAuthenticated(false);
+      logger.info('Logout successful');
       router.push('/auth/login');
     } catch (error) {
-      console.error('Logout error:', error);
+      logger.error('Logout failed:', { error });
     } finally {
       setLoading(false);
     }
   };
 
-  // Check auth status on mount and when pathname changes
   useEffect(() => {
     const checkAuth = async () => {
-      // Don't check auth on public routes
       if (publicPaths.includes(pathname)) {
+        logger.debug('Skipping auth check for public path', { pathname });
         setLoading(false);
         return;
       }
       
+      logger.debug('Checking authentication status');
       await refreshAuth();
     };
 

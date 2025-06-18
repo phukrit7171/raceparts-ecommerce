@@ -17,7 +17,11 @@ const whitelist = [
     'http://localhost:5173',
     'http://localhost:5174', // dev fallback when default port is busy
     'http://localhost:5175', // dev fallback when default port is busy
-    'http://172.20.128.1:5173' // Docker container IP address
+    'http://172.20.128.1:5173', // Docker container IP address
+    'http://localhost:3000', // Next.js default port
+    'http://127.0.0.1:3000', // Next.js alternative localhost
+    'http://localhost:3001', // Auth service
+    'http://127.0.0.1:3001'  // Auth service alternative localhost
 ];
 const corsOptions = {
     origin: function (origin, callback) {
@@ -27,6 +31,7 @@ const corsOptions = {
         // Check if origin is in whitelist or is a localhost URL
         if (whitelist.includes(origin) || 
             origin.startsWith('http://localhost') || 
+            origin.startsWith('http://127.0.0.1') ||
             origin.startsWith('http://172.20.128.1')) {
             return callback(null, true);
         }
@@ -34,7 +39,7 @@ const corsOptions = {
         console.log('Not allowed by CORS:', origin);
         callback(new Error('Not allowed by CORS'));
     },
-    credentials: true, // This is required for cookies/authorization headers with credentials
+    credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: [
         'Content-Type',
@@ -55,7 +60,8 @@ const corsOptions = {
         'access-control-allow-headers'
     ],
     optionsSuccessStatus: 200,
-    preflightContinue: false
+    preflightContinue: false,
+    maxAge: 86400 // Cache preflight requests for 24 hours
 };
 
 // Apply CORS middleware
@@ -70,6 +76,7 @@ app.use((req, res, next) => {
     if (origin) {
         const isAllowed = whitelist.includes(origin) || 
                         origin.startsWith('http://localhost') || 
+                        origin.startsWith('http://127.0.0.1') ||
                         origin.startsWith('http://172.20.128.1');
         
         if (isAllowed) {
@@ -160,6 +167,8 @@ services.forEach(({ route, target, protected: isProtected, pathRewrite }) => {
         target,
         changeOrigin: true,
         pathRewrite: pathRewrite || { [`^${route}`]: '' },
+        timeout: 5000, // 5 second timeout
+        proxyTimeout: 5000,
         on: {
             proxyRes: (proxyRes, req, res) => {
                 const origin = req.headers.origin;
@@ -175,11 +184,23 @@ services.forEach(({ route, target, protected: isProtected, pathRewrite }) => {
                             : [proxyRes.headers['set-cookie']];
                             
                         proxyRes.headers['set-cookie'] = cookies.map(cookie => {
-                            return cookie
-                                .split(';')
-                                .filter(v => v.trim().toLowerCase() !== 'secure' && !v.trim().toLowerCase().startsWith('samesite='))
-                                .join(';')
-                                .concat('; SameSite=None');
+                            // Parse the cookie string
+                            const [cookieName, ...parts] = cookie.split(';');
+                            const cookieParts = parts.map(part => part.trim());
+                            
+                            // Remove any existing SameSite and Secure attributes
+                            const filteredParts = cookieParts.filter(part => 
+                                !part.toLowerCase().startsWith('samesite=') && 
+                                !part.toLowerCase().startsWith('secure')
+                            );
+                            
+                            // Add SameSite=None and Secure for production, or SameSite=Lax for development
+                            const isProduction = process.env.NODE_ENV === 'production';
+                            const sameSite = isProduction ? 'None' : 'Lax';
+                            const secure = isProduction ? 'Secure' : '';
+                            
+                            // Reconstruct the cookie string
+                            return `${cookieName}; ${filteredParts.join('; ')}; SameSite=${sameSite}${secure ? '; ' + secure : ''}`;
                         });
                     }
                 }
@@ -194,11 +215,9 @@ services.forEach(({ route, target, protected: isProtected, pathRewrite }) => {
                     proxyReq.setHeader('x-user-role', req.user.role || '');
                 }
 
-                // For auth service routes, ensure we're not sending user headers
-                if (route === '/api/auth') {
-                    proxyReq.removeHeader('x-user-id');
-                    proxyReq.removeHeader('x-user-email');
-                    proxyReq.removeHeader('x-user-role');
+                // Forward the original origin header
+                if (req.headers.origin) {
+                    proxyReq.setHeader('Origin', req.headers.origin);
                 }
 
                 // Handle request body
@@ -212,7 +231,7 @@ services.forEach(({ route, target, protected: isProtected, pathRewrite }) => {
             error: (err, req, res) => {
                 console.error('[Gateway] Proxy error:', err);
                 res.status(500).json({ 
-                    success: false, 
+                    success: false,
                     message: 'Internal server error',
                     error: process.env.NODE_ENV === 'development' ? err.message : undefined
                 });
@@ -220,11 +239,20 @@ services.forEach(({ route, target, protected: isProtected, pathRewrite }) => {
         }
     };
 
-    // Create the proxy middleware
-    const proxy = createProxyMiddleware(proxyOptions);
+    // Add authentication check for protected routes
+    if (isProtected) {
+        app.use(route, (req, res, next) => {
+            if (!req.user) {
+                return res.status(401).json({
+                    success: false,
+                    message: 'Authentication required'
+                });
+            }
+            next();
+        });
+    }
 
-    // Apply the proxy middleware to the route
-    app.use(route, proxy);
+    app.use(route, createProxyMiddleware(proxyOptions));
 });
 
 // Start the server
