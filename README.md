@@ -1,277 +1,122 @@
-# RaceParts E-commerce
+# Raceparts E-commerce
 
-Online store for racing car parts and accessories.
+## Project Overview
+A full-stack e-commerce application for racing car parts built with microservices architecture. Includes product catalog, shopping cart, user authentication, payment processing, and admin functionality.
 
-## 🏎️ Features
+## Technology Stack
+- **Frontend**: Next.js 13 (TypeScript)
+- **Backend Services**: 
+  - API Gateway
+  - Authentication Service
+  - Product Service
+  - Cart Service
+  - Payment Service
+  - Admin Service
+- **Database**: Sequelize ORM with migrations and seeders
+- **Infrastructure**: Microservices architecture
 
-- User accounts and authentication
-- Browse products by category
-- Shopping cart and checkout
-- Order tracking
-- Admin dashboard
-
-## 🛠️ Tech Stack
-
-- **Frontend**: Next.js with TypeScript
-- **Backend**: Node.js with Express
-- **Database**: SQLite (development), PostgreSQL (production)
-- **Tools**: Docker, Sequelize ORM
-
-## 📚 API Documentation
-
-### Authentication Service
-
-#### Register New User
-- **Endpoint**: `POST /register`
-- **Description**: Create a new user account
-- **Request Body**:
-  ```json
-  {
-    "email": "user@example.com",
-    "password": "securepassword",
-    "first_name": "John",
-    "last_name": "Doe",
-    "phone": "+1234567890",
-    "address": "123 Main St"
-  }
-  ```
-- **Required Fields**: `email`, `password`, `first_name`, `last_name`
-- **Response**: JWT token and user data
-
-#### Login
-- **Endpoint**: `POST /login`
-- **Description**: Authenticate user and get JWT token
-- **Request Body**:
-  ```json
-  {
-    "email": "user@example.com",
-    "password": "securepassword"
-  }
-  ```
-- **Response**: JWT token in cookie and response body
-
-#### Logout
-- **Endpoint**: `POST /logout`
-- **Description**: Invalidate user session
-- **Response**: Success message
-
-#### Get Current User
-- **Endpoint**: `GET /me`
-- **Description**: Get current authenticated user's information
-- **Headers**: `Authorization: Bearer <token>`
-- **Response**: User data
-
-### Product Service
-
-#### Get All Products
-- **Endpoint**: `GET /`
-- **Description**: Get paginated list of products with filtering and sorting
-- **Query Parameters**:
-  - `page` (number, default: 1) - Page number
-  - `limit` (number, default: 12) - Items per page
-  - `search` (string, optional) - Search term for product name/description
-  - `category` (string, optional) - Filter by category slug
-  - `sort` (string, default: 'createdAt') - Field to sort by
-  - `order` (string, default: 'DESC') - Sort order ('ASC' or 'DESC')
-- **Response**: Paginated list of products
-
-#### Get Product by Slug
-- **Endpoint**: `GET /slug/:slug`
-- **Description**: Get product details by slug
-- **URL Parameters**:
-  - `slug` (string) - Product slug
-- **Response**: Product details
-
-#### Get All Categories
-- **Endpoint**: `GET /categories`
-- **Description**: Get all product categories with product counts
-- **Response**: List of categories
-
-### Cart Service
-
-#### Get Cart
-- **Endpoint**: `GET /`
-- **Description**: Get current user's cart
-- **Headers**: `Authorization: Bearer <token>`
-- **Response**: Cart items with product details and subtotal
-
-#### Add Item to Cart
-- **Endpoint**: `POST /`
-- **Description**: Add product to cart or update quantity if already exists
-- **Headers**: `Authorization: Bearer <token>`
-- **Request Body**:
-  ```json
-  {
-    "productId": 1,
-    "quantity": 2
-  }
-  ```
-- **Response**: Updated cart item
-
-#### Update Cart Item
-- **Endpoint**: `PATCH /:itemId`
-- **Description**: Update item quantity in cart
-- **Headers**: `Authorization: Bearer <token>`
-- **URL Parameters**:
-  - `itemId` (number) - Cart item ID
-- **Request Body**:
-  ```json
-  {
-    "quantity": 3
-  }
-  ```
-- **Response**: Updated cart item
-
-#### Remove Item from Cart
-- **Endpoint**: `DELETE /:itemId`
-- **Description**: Remove item from cart
-- **Headers**: `Authorization: Bearer <token>`
-- **URL Parameters**:
-  - `itemId` (number) - Cart item ID
-- **Response**: Success message
-
-### Payment Service
-
-#### Create Checkout Session
-- **Endpoint**: `POST /create-checkout-session`
-- **Description**: Create Stripe checkout session
-- **Headers**: `Authorization: Bearer <token>`
-- **Request Body**:
-  ```json
-  {
-    "origin": "http://localhost:5173"
-  }
-  ```
-- **Response**: Stripe session ID and URL
-
-#### Webhook (Stripe)
-- **Endpoint**: `POST /webhook`
-- **Description**: Handle Stripe webhook events
-- **Headers**: `Stripe-Signature` (from Stripe)
-- **Body**: Raw JSON from Stripe
-- **Note**: Used internally by Stripe, not for direct client use
-
-## 🚀 Quick Start
-
-### Prerequisites
-- Node.js (v16+)
-- npm (v8+)
-- PostgreSQL (for production)
+## Prerequisites
+- Node.js v18+
+- npm v9+
+- SQLite
 - Stripe account (for payments)
 
-### Environment Variables
-Create a `.env` file in the root directory with the following variables:
+## Setup Instructions
 
-```
-# Database
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=raceparts
-DB_USER=postgres
-DB_PASSWORD=your_password
-
-# JWT
-JWT_SECRET=your_jwt_secret
-JWT_EXPIRES_IN=7d
-
-# Stripe
-STRIPE_SECRET_KEY=your_stripe_secret_key
-STRIPE_WEBHOOK_SECRET=your_webhook_secret
-
-# Service Ports
-AUTH_SERVICE_PORT=3001
-PRODUCT_SERVICE_PORT=3002
-CART_SERVICE_PORT=3003
-PAYMENT_SERVICE_PORT=3004
-API_GATEWAY_PORT=3000
-
-# Frontend
-NEXT_PUBLIC_API_URL=http://localhost:3000
+### 1. Clone repository
+```bash
+git clone https://github.com/your-username/raceparts-ecommerce.git
+cd raceparts-ecommerce
 ```
 
-## 🚀 Quick Start
+### 2. Install dependencies
+```bash
+# Install root dependencies
+npm install
 
-1. **Install dependencies**
-   ```bash
-   # Install root dependencies
-   npm install
-   
-   # Install frontend
-   cd frontend
-   npm install
-   
-   # Install backend services
-   cd ../backend
-   cd auth-service && npm install
-   cd ../api-gateway && npm install
-   cd ../cart-service && npm install
-   cd ../payment-service && npm install
-   cd ../admin-service && npm install
-   ```
+# Install frontend dependencies
+cd frontend
+npm install
 
-2. **Setup environment**
-   - Copy `.env.example` to `.env` in each service
-   - Update database and API keys
+# Install backend dependencies (for each service)
+cd ../backend
+for service in */; do cd $service && npm install && cd ..; done
+```
 
-3. **Start development servers**
-   ```bash
-   # Start all services
-   npm run dev:frontend
-   npm run dev:backend
-   ```
+### 3. Database Configuration
+1. Create a new database in your SQL server
+2. Configure connection settings in `database/config.js`
+3. Run migrations and seeders:
+```bash
+cd database
+npx sequelize-cli db:migrate
+npx sequelize-cli db:seed:all
+```
 
-4. **Access the app**
-   - Website: http://localhost:5173
-   - API: http://localhost:3000
+### 4. Environment Variables
+Copy `.env.example` to `.env` and fill in values:
+```bash
+cp .env.example .env
+```
+Required variables:
+- `DATABASE_URL` - Database connection string
+- `JWT_SECRET` - Secret for JSON Web Tokens
+- `STRIPE_SECRET_KEY` - Stripe API secret key
+- `NEXTAUTH_SECRET` - NextAuth secret
 
-## 🛠️ Available Scripts
+### 5. Run the Application
+Start all services in separate terminals:
+```bash
+# Start API Gateway
+cd backend/api-gateway
+npm start
 
-- `npm run dev:frontend` - Start frontend
-- `npm run dev:backend` - Start all backend services
-- `npm run build` - Build for production
-- `npm test` - Run tests
+# Start Auth Service
+cd ../auth-service
+npm start
 
-## 📦 Services
+# Start Product Service
+cd ../product-service
+npm start
 
-### Frontend
-- `frontend/` - Main Next.js application
-  - Pages, components, and styles
-  - API route handlers
-  - Client-side state management
+# Start Cart Service
+cd ../cart-service
+npm start
 
-### Backend Services
-- `backend/api-gateway/` - API Gateway
-  - Routes requests to appropriate microservices
-  - Handles CORS and request/response transformation
-  - Load balancing and service discovery
+# Start Payment Service
+cd ../payment-service
+npm start
 
-- `backend/auth-service/` - Authentication Service
-  - User registration and authentication
-  - JWT token management
-  - User profile management
+# Start Admin Service
+cd ../admin-service
+npm start
 
-- `backend/cart-service/` - Cart Service
-  - Shopping cart operations
-  - Cart item management
-  - Price calculations
+# Start Frontend
+cd ../../frontend
+npm run dev
+```
 
-- `backend/payment-service/` - Payment Service
-  - Stripe integration
-  - Checkout session management
-  - Order processing
-  - Webhook handling
+## Project Structure
+```
+├── backend/              # Backend microservices
+│   ├── admin-service/    # Admin management
+│   ├── api-gateway/      # API routing gateway
+│   ├── auth-service/     # User authentication
+│   ├── cart-service/     # Shopping cart management
+│   ├── payment-service/  # Payment processing
+│   └── product-service/  # Product catalog
+├── database/             # Database migrations & seeders
+├── docs/                 # Documentation
+├── frontend/             # Next.js frontend application
+├── .env.example          # Environment template
+└── .sequelizerc          # Sequelize configuration
+```
 
-- `backend/admin-service/` - Admin Dashboard
-  - Product management
-  - Order management
-  - User management
-  - Analytics and reporting
+## API Documentation
+See [docs/API_Documentation.md](docs/API_Documentation.md) for detailed API specifications.
 
-### Database
-- `backend/**/migrations/` - Database migrations
-- `backend/**/models/` - Sequelize models
-- `backend/**/seeders/` - Database seed data
+## Deployment
+The application can be deployed using Docker containers. Refer to [docs/HANDOVER.md](docs/HANDOVER.md) for deployment instructions.
 
-## 📝 License
-
-MIT
+## License
+MIT Licensed - See [LICENSE](LICENSE) for details.
