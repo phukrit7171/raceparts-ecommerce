@@ -42,6 +42,8 @@ export const authAPI = {
     api.post('/api/auth/login', data),
   logout: () => api.post('/api/auth/logout'),
   me: () => api.get('/api/auth/me'),
+  updateProfile: (data: { first_name: string; last_name: string; phone?: string; address?: string }) =>
+    api.put('/api/auth/profile', data),
 };
 
 // Products API

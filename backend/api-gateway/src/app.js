@@ -52,9 +52,7 @@ const corsOptions = {
         'access-control-allow-credentials',
         'access-control-allow-origin',
         'access-control-allow-methods',
-        'access-control-allow-headers',
-        'access-control-allow-origin',
-        'access-control-allow-methods'
+        'access-control-allow-headers'
     ],
     optionsSuccessStatus: 200,
     preflightContinue: false
@@ -108,18 +106,16 @@ app.use(express.urlencoded({ extended: true }));
 const attachUserToRequest = (req, res, next) => {
     const token = req.cookies.jwt;
     if (token) {
-        jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-            if (err) {
-                // Invalid token, but maybe it's a public route, so just continue
-                return next();
-            }
+        try {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
             // Token is valid, attach user info to the request for protected routes
-            req.user = decoded; 
-            next();
-        });
-    } else {
-        next();
+            req.user = decoded;
+        } catch (err) {
+            // Invalid token, clear the cookie
+            res.clearCookie('jwt');
+        }
     }
+    next();
 };
 app.use(attachUserToRequest); // Apply to all requests
 
@@ -160,7 +156,6 @@ const services = [
 
 // Set up proxies for each service
 services.forEach(({ route, target, protected: isProtected, pathRewrite }) => {
-
     const proxyOptions = {
         target,
         changeOrigin: true,
@@ -196,41 +191,40 @@ services.forEach(({ route, target, protected: isProtected, pathRewrite }) => {
                 if (req.user) {
                     proxyReq.setHeader('x-user-id', req.user.id);
                     proxyReq.setHeader('x-user-email', req.user.email || '');
+                    proxyReq.setHeader('x-user-role', req.user.role || '');
                 }
 
-                // The crucial part: handle requests with a body
+                // For auth service routes, ensure we're not sending user headers
+                if (route === '/api/auth') {
+                    proxyReq.removeHeader('x-user-id');
+                    proxyReq.removeHeader('x-user-email');
+                    proxyReq.removeHeader('x-user-role');
+                }
+
+                // Handle request body
                 if (req.body) {
                     const bodyData = JSON.stringify(req.body);
-                    // You must set the Content-Type and Content-Length headers
                     proxyReq.setHeader('Content-Type', 'application/json');
                     proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
-                    // And then write the data to the proxy request stream
                     proxyReq.write(bodyData);
                 }
             },
-            // Add error handling for robustness
             error: (err, req, res) => {
                 console.error('[Gateway] Proxy error:', err);
-                res.status(500).send('Proxy Error');
+                res.status(500).json({ 
+                    success: false, 
+                    message: 'Internal server error',
+                    error: process.env.NODE_ENV === 'development' ? err.message : undefined
+                });
             }
         }
     };
 
+    // Create the proxy middleware
     const proxy = createProxyMiddleware(proxyOptions);
 
-    if (isProtected) {
-        // For protected routes, run the auth check middleware first
-        app.use(route, (req, res, next) => {
-            if (!req.user) {
-                console.log(`[Gateway] -> BLOCKED Unauthenticated request to protected route ${req.originalUrl}`);
-                return res.status(401).json({ success: false, message: 'Unauthorized: You must be logged in.' });
-            }
-            next();
-        }, proxy);
-    } else {
-        // For public routes, just use the proxy
-        app.use(route, proxy);
-    }
+    // Apply the proxy middleware to the route
+    app.use(route, proxy);
 });
 
 // Start the server

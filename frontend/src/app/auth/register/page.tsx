@@ -8,13 +8,13 @@ import { useFormStatus } from 'react-dom';
 import { useAuth } from '@/context/AuthContext';
 import { showAlert } from '@/lib/api';
 
-// NEW: Define a state shape for our form action
+// Define a state shape for our form action
 interface ActionState {
   message: string;
   status: 'success' | 'error' | 'idle';
 }
 
-// NEW: A dedicated component for the submit button
+// A dedicated component for the submit button
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
@@ -35,19 +35,19 @@ export default function RegisterPage() {
   const { register } = useAuth();
   const router = useRouter();
 
-// Define error shape for registration
-interface RegistrationError {
-  response?: {
-    data?: {
-      message?: string;
-      error?: string;
+  // Define error shape for registration
+  interface RegistrationError {
+    response?: {
+      data?: {
+        message?: string;
+        error?: string;
+      };
     };
-  };
-  message?: string;
-}
+    message?: string;
+  }
 
-// NEW: The action function for registration
-const handleRegisterAction = async (state: ActionState, formData: FormData): Promise<ActionState> => {
+  // The action function for registration
+  const handleRegisterAction = async (state: ActionState, formData: FormData): Promise<ActionState> => {
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
     const confirmPassword = formData.get('confirmPassword') as string;
@@ -72,7 +72,7 @@ const handleRegisterAction = async (state: ActionState, formData: FormData): Pro
         phone, 
         address 
       });
-      return { status: 'success', message: 'Account created successfully!' };
+      return { status: 'success', message: 'Account created successfully! Redirecting...' };
     } catch (error: unknown) {
       // Handle specific error structure
       const err = error as RegistrationError;
@@ -86,11 +86,14 @@ const handleRegisterAction = async (state: ActionState, formData: FormData): Pro
   const initialState: ActionState = { message: '', status: 'idle' };
   const [state, formAction] = React.useActionState(handleRegisterAction, initialState);
 
-  // NEW: useEffect to handle side-effects from the action's result
+  // useEffect to handle side-effects from the action's result
   useEffect(() => {
     if (state.status === 'success') {
       showAlert.success(state.message);
-      router.push('/');
+      // Redirect to login page instead of home
+      setTimeout(() => {
+        router.push('/auth/login');
+      }, 1500);
     }
     if (state.status === 'error') {
       showAlert.error(state.message);
@@ -108,48 +111,104 @@ const handleRegisterAction = async (state: ActionState, formData: FormData): Pro
                 <p className="text-muted">Join the RaceParts community</p>
               </div>
 
-              {/* UPDATED: Form uses the `action` prop */}
               <form action={formAction}>
                 <div className="row">
                   <div className="col-md-6 mb-3">
                     <label htmlFor="first_name" className="form-label">First Name</label>
-                    <input type="text" className="form-control" id="first_name" name="first_name" required placeholder="Enter your first name"/>
+                    <input 
+                      type="text" 
+                      className="form-control" 
+                      id="first_name" 
+                      name="first_name" 
+                      required 
+                      placeholder="Enter your first name"
+                    />
                   </div>
                   <div className="col-md-6 mb-3">
                     <label htmlFor="last_name" className="form-label">Last Name</label>
-                    <input type="text" className="form-control" id="last_name" name="last_name" required placeholder="Enter your last name"/>
+                    <input 
+                      type="text" 
+                      className="form-control" 
+                      id="last_name" 
+                      name="last_name" 
+                      required 
+                      placeholder="Enter your last name"
+                    />
                   </div>
                 </div>
+
                 <div className="mb-3">
                   <label htmlFor="email" className="form-label">Email Address</label>
-                  <input type="email" className="form-control" id="email" name="email" required placeholder="Enter your email"/>
+                  <input 
+                    type="email" 
+                    className="form-control" 
+                    id="email" 
+                    name="email" 
+                    required 
+                    placeholder="Enter your email"
+                  />
                 </div>
+
                 <div className="mb-3">
                   <label htmlFor="password" className="form-label">Password</label>
-                  <input type="password" className="form-control" id="password" name="password" required placeholder="Enter your password" minLength={6}/>
+                  <input 
+                    type="password" 
+                    className="form-control" 
+                    id="password" 
+                    name="password" 
+                    required 
+                    placeholder="Enter your password" 
+                    minLength={6}
+                  />
                   <div className="form-text">Password must be at least 6 characters long.</div>
                 </div>
+
                 <div className="mb-3">
                   <label htmlFor="confirmPassword" className="form-label">Confirm Password</label>
-                  <input type="password" className="form-control" id="confirmPassword" name="confirmPassword" required placeholder="Confirm your password"/>
+                  <input 
+                    type="password" 
+                    className="form-control" 
+                    id="confirmPassword" 
+                    name="confirmPassword" 
+                    required 
+                    placeholder="Confirm your password" 
+                    minLength={6}
+                  />
                 </div>
-                <div className="mb-3">
-                  <label htmlFor="phone" className="form-label">Phone Number</label>
-                  <input type="tel" className="form-control" id="phone" name="phone" placeholder="Enter your phone number (optional)"/>
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="address" className="form-label">Address</label>
-                  <textarea className="form-control" id="address" name="address" rows={2} placeholder="Enter your address (optional)"></textarea>
-                </div>
-                <SubmitButton />
-              </form>
 
-              <div className="text-center mt-3">
-                <p className="mb-0">
-                  Already have an account?{' '}
-                  <Link href="/auth/login" className="text-decoration-none">Sign in here</Link>
-                </p>
-              </div>
+                <div className="mb-3">
+                  <label htmlFor="phone" className="form-label">Phone Number (Optional)</label>
+                  <input 
+                    type="tel" 
+                    className="form-control" 
+                    id="phone" 
+                    name="phone" 
+                    placeholder="Enter your phone number"
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label htmlFor="address" className="form-label">Address (Optional)</label>
+                  <textarea 
+                    className="form-control" 
+                    id="address" 
+                    name="address" 
+                    rows={3}
+                    placeholder="Enter your address"
+                  />
+                </div>
+
+                <SubmitButton />
+
+                <div className="text-center mt-3">
+                  <p className="mb-0">
+                    Already have an account?{' '}
+                    <Link href="/auth/login" className="text-primary">
+                      Login here
+                    </Link>
+                  </p>
+                </div>
+              </form>
             </div>
           </div>
         </div>

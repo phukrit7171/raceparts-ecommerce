@@ -25,7 +25,7 @@ interface AuthContextType {
   loading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (data: RegisterData) => Promise<void>;
+  register: (data: RegisterData) => Promise<boolean>;
   logout: () => Promise<void>;
   refreshAuth: () => Promise<boolean>;
 }
@@ -51,7 +51,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const refreshAuth = useCallback(async (): Promise<boolean> => {
     try {
       const response = await authAPI.me();
-      setUser(response.data);
+      setUser(response.data.user);
       setIsAuthenticated(true);
       return true;
     } catch (error) {
@@ -72,8 +72,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string) => {
     setLoading(true);
     try {
-      await authAPI.login({ email, password });
-      await refreshAuth();
+      const response = await authAPI.login({ email, password });
+      // Set user data immediately from the login response
+      setUser(response.data.user);
+      setIsAuthenticated(true);
+      router.replace('/');
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -83,8 +89,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(true);
     try {
       await authAPI.register(data);
-      // After registration, log the user in
-      await login(data.email, data.password);
+      // Remove automatic login after registration
+      return true;
+    } catch (error) {
+      throw error;
     } finally {
       setLoading(false);
     }

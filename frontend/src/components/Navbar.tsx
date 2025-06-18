@@ -92,6 +92,14 @@ const Navbar: React.FC = () => {
                       <hr className="dropdown-divider" />
                     </li>
                     <li>
+                      <Link href="/profile" className="dropdown-item">
+                        Edit Profile
+                      </Link>
+                    </li>
+                    <li>
+                      <hr className="dropdown-divider" />
+                    </li>
+                    <li>
                       <button className="dropdown-item" onClick={handleLogout}>
                         Logout
                       </button>

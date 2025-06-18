@@ -34,6 +34,7 @@ app.post('/register', authController.register);
 app.post('/login', authController.login);
 app.post('/logout', authController.logout);
 app.get('/me', authController.protect, authController.getMe);
+app.put('/profile', authController.protect, authController.updateProfile);
 
 // Health check route
 app.get('/health', (req, res) => {
