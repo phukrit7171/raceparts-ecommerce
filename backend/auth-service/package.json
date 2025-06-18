@@ -33,7 +33,7 @@
     "chai-as-promised": "^8.0.1",
     "chai-http": "^5.1.2",
     "cross-env": "^7.0.3",
-    "mocha": "^10.2.0",
+    "mocha": "^10.8.2",
     "nodemon": "^3.0.2",
     "supertest": "^6.3.4"
   }
