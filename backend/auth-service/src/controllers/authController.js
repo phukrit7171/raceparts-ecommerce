@@ -40,24 +40,66 @@ const createSendToken = (user, statusCode, res) => {
 
 exports.register = async (req, res) => {
   try {
-    const { email, password, first_name, last_name, phone, address } = req.body;
+    console.log('Registration request body:', req.body);
+    const { email, password, first_name, last_name, phone = '', address = '' } = req.body;
+
+    // Basic validation
+    if (!email || !password || !first_name || !last_name) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required fields',
+        required: ['email', 'password', 'first_name', 'last_name'],
+        received: Object.keys(req.body).filter(key => req.body[key])
+      });
+    }
+
+    // Check if email already exists
+    const existingUser = await User.findOne({ where: { email } });
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email already in use',
+        field: 'email'
+      });
+    }
 
     const newUser = await User.create({
       uuid: uuidv4(),
-      email,
-      password, // The model hook will hash this automatically
-      first_name,
-      last_name,
-      phone,
-      address,
+      email: email.trim().toLowerCase(),
+      password,
+      first_name: first_name.trim(),
+      last_name: last_name.trim(),
+      phone: phone ? phone.trim() : null,
+      address: address ? address.trim() : null,
+      role: 'customer'
     });
 
+    console.log('User created successfully:', newUser.uuid);
     createSendToken(newUser, 201, res);
   } catch (error) {
-    res.status(400).json({
+    console.error('Registration error:', error);
+    
+    // Handle Sequelize validation errors
+    if (error.name === 'SequelizeValidationError' || error.name === 'SequelizeUniqueConstraintError') {
+      const errors = error.errors.map(err => ({
+        field: err.path,
+        message: err.message,
+        type: err.type,
+        value: err.value
+      }));
+      
+      return res.status(400).json({
+        success: false,
+        message: 'Validation error',
+        errors
+      });
+    }
+
+    // Handle other errors
+    res.status(500).json({
       success: false,
       message: 'Registration failed',
-      error: error.message,
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong'
     });
   }
 };
