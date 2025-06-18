@@ -141,7 +141,7 @@ const services = [
         protected: false,
         pathRewrite: {
             '^/api/products/categories': '/categories',
-            '^/api/products/slug/(.*)': '/products/slug/$1',
+            '^/api/products/slug/([^/]+)$': '/products/slug/$1',
             '^/api/products/(?!categories|slug)': '/products/$1',
             '^/api/products$': ''
         }

@@ -1,7 +1,7 @@
 import cache from './cache';
 
 // Default blocklist URL (replace with your actual URL)
-const DEFAULT_BLOCKLIST_URL = 'https://raw.githubusercontent.com/Bon-Appetit/porn-domains/refs/heads/master/block.txt';
+const DEFAULT_BLOCKLIST_URL = 'https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts';
 
 // In-memory cache with TTL (1 hour)
 const BLOCKLIST_CACHE_KEY = 'blocklist';
@@ -10,7 +10,10 @@ const BLOCKLIST_TTL = 60 * 60 * 1000; // 1 hour in milliseconds
 // Default blocklist (fallback if fetch fails)
 const DEFAULT_BLOCKLIST: string[] = [
   'example-blocked-domain.com',
-  'another-blocked-domain.com'
+  'another-blocked-domain.com',
+  'malware.example.com',
+  'phishing.example.com',
+  'spam.example.com'
 ];
 
 /**

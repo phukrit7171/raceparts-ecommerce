@@ -53,7 +53,7 @@ export default function HomePage() {
                 <Link href="/products" className="btn btn-light btn-lg">
                   Shop Now
                 </Link>
-                <Link href="/products/categories" className="btn btn-outline-light btn-lg">
+                <Link href="/products" className="btn btn-outline-light btn-lg">
                   Browse Categories
                 </Link>
               </div>

@@ -25,6 +25,16 @@ const nextConfig: NextConfig = {
               "img-src 'self' data: https://*.stripe.com",
               "connect-src 'self' http://localhost:3000 https://api.stripe.com https://m.stripe.network",
               "frame-src 'self' https://js.stripe.com https://hooks.stripe.com",
+              "block-all-mixed-content",
+              "upgrade-insecure-requests",
+              "base-uri 'self'",
+              "form-action 'self'",
+              "frame-ancestors 'none'",
+              "object-src 'none'",
+              "media-src 'self'",
+              "worker-src 'self'",
+              "child-src 'self'",
+              "manifest-src 'self'"
             ].join('; ')
           }
         ]
