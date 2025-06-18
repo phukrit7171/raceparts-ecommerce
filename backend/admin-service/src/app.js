@@ -24,6 +24,55 @@ const CategoryModel = require("../../product-service/src/models/Category");
 const OrderModel = require("../../payment-service/src/models/Order");
 const OrderItemModel = require("../../payment-service/src/models/OrderItem");
 
+// Translations configuration
+const translations = {
+  translation: {
+    labels: {
+      users: 'Users',
+      products: 'Products',
+      categories: 'Categories',
+      orders: 'Orders',
+      order_items: 'Order Items',
+      'role.customer': 'Customer',
+      'role.admin': 'Admin',
+      'is_active.true': 'Yes',
+      'is_active.false': 'No',
+      'status.pending': 'Pending',
+      'status.paid': 'Paid',
+      'status.shipped': 'Shipped',
+      'status.delivered': 'Delivered',
+      'status.cancelled': 'Cancelled'
+    },
+    properties: {
+      email: 'Email',
+      id: 'ID',
+      updatedAt: 'Updated At',
+      createdAt: 'Created At',
+      role: 'Role',
+      address: 'Address',
+      phone: 'Phone',
+      last_name: 'Last Name',
+      first_name: 'First Name',
+      uuid: 'UUID',
+      password: 'Password',
+      name: 'Name',
+      description: 'Description',
+      price: 'Price',
+      stock_quantity: 'Stock Quantity',
+      images: 'Images',
+      specifications: 'Specifications',
+      is_active: 'Is Active',
+      slug: 'Slug',
+      image_url: 'Image URL',
+      total_amount: 'Total Amount',
+      status: 'Status',
+      stripe_payment_intent_id: 'Stripe Payment Intent ID',
+      shipping_address: 'Shipping Address',
+      quantity: 'Quantity'
+    }
+  }
+};
+
 const start = async () => {
   // We need to initialize sequelize in this service as well to pass it to the models
   const { sequelize } = require("../../auth-service/src/models");
@@ -36,7 +85,18 @@ const start = async () => {
   const OrderItem = OrderItemModel(sequelize);
 
   // This is the correct way to register the adapter in v6
-  AdminJS.registerAdapter({ Database, Resource });
+  AdminJS.registerAdapter({
+    Database,
+    Resource,
+    options: {
+      // Add any Sequelize-specific options here
+      sequelize: sequelize,
+      // Enable timestamps
+      timestamps: true,
+      // Enable underscored option for snake_case
+      underscored: true,
+    }
+  });
 
   // --- v6 COMPATIBILITY CHANGES END HERE ---
 
@@ -51,36 +111,197 @@ const start = async () => {
   );
 
   const adminJs = new AdminJS({
-    // Pass the initialized models directly
     resources: [
       {
         resource: User,
         options: {
-          /* User options */
+          navigation: {
+            name: translations.translation.labels.users,
+            icon: 'User',
+          },
+          properties: {
+            id: {
+              isVisible: {
+                list: true,
+                filter: true,
+                show: true,
+                edit: false
+              }
+            },
+            email: { 
+              isTitle: true,
+              isRequired: true
+            },
+            password: {
+              isVisible: {
+                list: false,
+                filter: false,
+                show: false,
+                edit: true
+              },
+              isRequired: true
+            },
+            uuid: {
+              isVisible: {
+                list: false,
+                filter: false,
+                show: true,
+                edit: false
+              }
+            },
+            role: {
+              availableValues: [
+                { value: 'customer', label: translations.translation.labels['role.customer'] },
+                { value: 'admin', label: translations.translation.labels['role.admin'] },
+              ],
+              isRequired: true
+            },
+            first_name: {
+              isRequired: false,
+              isVisible: {
+                list: true,
+                filter: true,
+                show: true,
+                edit: true
+              }
+            },
+            last_name: {
+              isRequired: false,
+              isVisible: {
+                list: true,
+                filter: true,
+                show: true,
+                edit: true
+              }
+            },
+            phone: {
+              isRequired: false,
+              isVisible: {
+                list: true,
+                filter: true,
+                show: true,
+                edit: true
+              }
+            },
+            address: {
+              isRequired: false,
+              isVisible: {
+                list: false,
+                filter: false,
+                show: true,
+                edit: true
+              }
+            },
+            createdAt: {
+              isVisible: {
+                list: true,
+                filter: true,
+                show: true,
+                edit: false
+              }
+            },
+            updatedAt: {
+              isVisible: {
+                list: false,
+                filter: false,
+                show: true,
+                edit: false
+              }
+            }
+          },
+          listProperties: ['id', 'email', 'first_name', 'last_name', 'role', 'phone', 'createdAt'],
+          id: 'users',
+          actions: {
+            new: {
+              before: async (request) => {
+                if (request.payload.password) {
+                  request.payload = {
+                    ...request.payload,
+                    password: await bcrypt.hash(request.payload.password, 12)
+                  }
+                }
+                return request
+              }
+            },
+            edit: {
+              before: async (request) => {
+                if (request.payload.password) {
+                  request.payload = {
+                    ...request.payload,
+                    password: await bcrypt.hash(request.payload.password, 12)
+                  }
+                }
+                return request
+              }
+            }
+          }
         },
       },
       {
         resource: Product,
         options: {
-          /* Product options */
+          navigation: {
+            name: translations.translation.labels.products,
+            icon: 'Package',
+          },
+          properties: {
+            name: { isTitle: true },
+            is_active: {
+              availableValues: [
+                { value: true, label: translations.translation.labels['is_active.true'] },
+                { value: false, label: translations.translation.labels['is_active.false'] },
+              ],
+            },
+          },
+          listProperties: ['id', 'name', 'price', 'stock_quantity', 'is_active', 'createdAt'],
+          id: 'products'
         },
       },
       {
         resource: Category,
         options: {
-          /* Category options */
+          navigation: {
+            name: translations.translation.labels.categories,
+            icon: 'Folder',
+          },
+          properties: {
+            name: { isTitle: true },
+          },
+          listProperties: ['id', 'name', 'slug', 'createdAt'],
+          id: 'categories'
         },
       },
       {
         resource: Order,
         options: {
-          /* Order options */
+          navigation: {
+            name: translations.translation.labels.orders,
+            icon: 'ShoppingCart',
+          },
+          properties: {
+            status: {
+              availableValues: [
+                { value: 'pending', label: translations.translation.labels['status.pending'] },
+                { value: 'paid', label: translations.translation.labels['status.paid'] },
+                { value: 'shipped', label: translations.translation.labels['status.shipped'] },
+                { value: 'delivered', label: translations.translation.labels['status.delivered'] },
+                { value: 'cancelled', label: translations.translation.labels['status.cancelled'] },
+              ],
+            },
+          },
+          listProperties: ['id', 'total_amount', 'status', 'createdAt'],
+          id: 'orders'
         },
       },
       {
         resource: OrderItem,
         options: {
-          /* OrderItem options */
+          navigation: {
+            name: translations.translation.labels.order_items,
+            icon: 'List',
+          },
+          listProperties: ['id', 'quantity', 'price', 'createdAt'],
+          id: 'order_items'
         },
       },
     ],
@@ -89,6 +310,31 @@ const start = async () => {
       companyName: "RaceParts E-commerce",
       softwareBrothers: false,
     },
+    locale: {
+      language: 'en',
+      translations,
+      i18n: {
+        backend: {
+          loadPath: '/admin/locales/{{lng}}/{{ns}}',
+        },
+        debug: true,
+        initImmediate: true,
+        ns: ['translation'],
+        defaultNS: 'translation',
+        fallbackLng: ['en'],
+        interpolation: {
+          escapeValue: false,
+        },
+      },
+    },
+    // Add Sequelize-specific configuration
+    database: {
+      client: 'sqlite3',
+      connection: {
+        filename: path.join(__dirname, '..', '..', '..', 'database', 'raceparts.db')
+      },
+      useNullAsDefault: true
+    }
   });
 
   const adminRouter = AdminJSExpress.buildAuthenticatedRouter(

@@ -76,7 +76,6 @@ module.exports = (sequelize) => {
   User.prototype.toJSON = function() {
     const user = { ...this.get() };
     delete user.password;
-    delete user.id;
     return user;
   };
 
