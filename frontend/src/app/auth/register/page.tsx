@@ -40,8 +40,10 @@ interface RegistrationError {
   response?: {
     data?: {
       message?: string;
+      error?: string;
     };
   };
+  message?: string;
 }
 
 // NEW: The action function for registration
@@ -51,6 +53,8 @@ const handleRegisterAction = async (state: ActionState, formData: FormData): Pro
     const confirmPassword = formData.get('confirmPassword') as string;
     const first_name = formData.get('first_name') as string;
     const last_name = formData.get('last_name') as string;
+    const phone = formData.get('phone') as string || '';
+    const address = formData.get('address') as string || '';
 
     if (password !== confirmPassword) {
       return { status: 'error', message: 'Passwords do not match' };
@@ -60,7 +64,14 @@ const handleRegisterAction = async (state: ActionState, formData: FormData): Pro
     }
 
     try {
-      await register({ email, password, first_name, last_name });
+      await register({ 
+        email, 
+        password, 
+        first_name, 
+        last_name, 
+        phone, 
+        address 
+      });
       return { status: 'success', message: 'Account created successfully!' };
     } catch (error: unknown) {
       // Handle specific error structure
@@ -121,6 +132,14 @@ const handleRegisterAction = async (state: ActionState, formData: FormData): Pro
                 <div className="mb-3">
                   <label htmlFor="confirmPassword" className="form-label">Confirm Password</label>
                   <input type="password" className="form-control" id="confirmPassword" name="confirmPassword" required placeholder="Confirm your password"/>
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="phone" className="form-label">Phone Number</label>
+                  <input type="tel" className="form-control" id="phone" name="phone" placeholder="Enter your phone number (optional)"/>
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="address" className="form-label">Address</label>
+                  <textarea className="form-control" id="address" name="address" rows={2} placeholder="Enter your address (optional)"></textarea>
                 </div>
                 <SubmitButton />
               </form>

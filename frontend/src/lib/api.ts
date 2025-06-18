@@ -49,6 +49,7 @@ export const productsAPI = {
   getProducts: (params?: { page?: number; limit?: number; search?: string; category?: string; sort?: string; order?: string; }) => 
     api.get('/api/products', { params }),
   getProductBySlug: (slug: string) => api.get(`/api/products/slug/${slug}`),
+  getProductById: (id: number) => api.get(`/api/products/${id}`),
   getCategories: () => api.get('/api/products/categories'),
 };
 

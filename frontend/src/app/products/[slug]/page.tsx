@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import Image from 'next/image';
 import { productsAPI, showAlert } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
@@ -25,42 +25,44 @@ interface Product {
 export default function ProductDetailPage() {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
-  const { slug } = useParams();
   const { user } = useAuth();
   const { addToCart } = useCart();
   const router = useRouter();
+  const { slug } = useParams();
 
   useEffect(() => {
     const fetchProduct = async () => {
+      if (!slug) {
+        setError('Product slug is missing');
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
-        const response = await productsAPI.getProductBySlug(slug as string);
-        setProduct(response.data);
-      } catch (error: unknown) {
-        console.error('Error fetching product:', error);
-        if (
-          error && 
-          typeof error === 'object' && 
-          'response' in error && 
-          error.response && 
-          typeof error.response === 'object' && 
-          error.response &&
-          'status' in error.response && 
-          typeof (error.response as { status: unknown }).status === 'number' &&
-          (error.response as { status: number }).status === 404
-        ) {
-          showAlert.error('Product not found');
-          router.push('/products');
+        setError(null);
+        
+        // Get the product by slug
+        const response = await productsAPI.getProductBySlug(Array.isArray(slug) ? slug[0] : slug);
+        
+        if (response.data?.success && response.data.data) {
+          setProduct(response.data.data);
+        } else {
+          throw new Error(response.data?.message || 'Product not found');
         }
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load product';
+        console.error('Error fetching product:', errorMessage);
+        setError(errorMessage);
+        showAlert.error('Failed to load product details');
       } finally {
         setLoading(false);
       }
     };
 
-    if (slug) {
-      fetchProduct();
-    }
+    fetchProduct();
   }, [slug, router]);
 
   const handleAddToCart = async () => {
@@ -86,27 +88,28 @@ export default function ProductDetailPage() {
     return (
       <div className="container py-5">
         <div className="row">
-          <div className="col-12">
-            <div className="d-flex justify-content-center">
-              <div className="spinner-border" role="status" style={{ width: '3rem', height: '3rem' }}>
-                <span className="visually-hidden">Loading...</span>
-              </div>
+          <div className="col-12 text-center">
+            <div className="spinner-border text-primary" style={{ width: '3rem', height: '3rem' }} role="status">
+              <span className="visually-hidden">Loading...</span>
             </div>
+            <p className="mt-3">Loading product details...</p>
           </div>
         </div>
       </div>
     );
   }
 
-  if (!product) {
+  if (error || !product) {
     return (
       <div className="container py-5">
         <div className="row">
           <div className="col-12 text-center">
-            <h2>Product not found</h2>
-            <p className="text-muted">The product you&apos;re looking for doesn&apos;t exist.</p>
+            <h2>Product Not Found</h2>
+            <p className="text-muted">
+              The product you&apos;re looking for doesn&apos;t exist or may have been removed.
+            </p>
             <button
-              className="btn btn-primary"
+              className="btn btn-primary mt-3"
               onClick={() => router.push('/products')}
             >
               Back to Products
@@ -116,6 +119,8 @@ export default function ProductDetailPage() {
       </div>
     );
   }
+
+
 
   return (
     <div className="container py-5">
