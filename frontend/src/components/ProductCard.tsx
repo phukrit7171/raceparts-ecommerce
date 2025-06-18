@@ -25,6 +25,16 @@ interface ProductCardProps {
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { user } = useAuth();
   const { addToCart } = useCart();
+  const [imageError, setImageError] = React.useState(false);
+
+  const isValidImageUrl = (url: string): boolean => {
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  };
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -50,7 +60,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     <div className="col-lg-4 col-md-6 col-sm-12 mb-4">
       <div className="card h-100 shadow-sm border-0">
         <div className="position-relative">
-          {product.images && product.images.length > 0 ? (
+          {product.images && product.images.length > 0 && !imageError && isValidImageUrl(product.images[0]) ? (
             <div className={`card-img-top ${styles.cardImageContainer}`}>
               <Image
                 src={product.images[0]}
@@ -58,6 +68,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 fill
                 className={styles.cardImage}
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                onError={() => setImageError(true)}
               />
             </div>
           ) : (

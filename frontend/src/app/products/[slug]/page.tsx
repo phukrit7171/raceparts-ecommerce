@@ -27,10 +27,20 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
+  const [imageError, setImageError] = useState(false);
   const { user } = useAuth();
   const { addToCart } = useCart();
   const router = useRouter();
   const { slug } = useParams();
+
+  const isValidImageUrl = (url: string): boolean => {
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  };
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -120,8 +130,6 @@ export default function ProductDetailPage() {
     );
   }
 
-
-
   return (
     <div className="container py-5">
       {/* Breadcrumb */}
@@ -163,7 +171,7 @@ export default function ProductDetailPage() {
         {/* Product Image */}
         <div className="col-lg-6 mb-4">
           <div className="card border-0 shadow-sm">
-            {product.images && product.images.length > 0 ? (
+            {product.images && product.images.length > 0 && !imageError && isValidImageUrl(product.images[0]) ? (
               <div className="position-relative w-100" style={{ height: '400px' }}>
                 <Image
                   src={product.images[0]}
@@ -172,6 +180,7 @@ export default function ProductDetailPage() {
                   className="rounded"
                   style={{ objectFit: 'cover' }}
                   priority
+                  onError={() => setImageError(true)}
                 />
               </div>
             ) : (

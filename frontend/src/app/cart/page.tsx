@@ -14,6 +14,7 @@ export default function CartPage() {
   const { user } = useAuth();
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const [imageErrors, setImageErrors] = useState<{[key: number]: boolean}>({});
   const router = useRouter();
 
   useEffect(() => {
@@ -22,6 +23,22 @@ export default function CartPage() {
       router.push('/auth/login');
     }
   }, [user, router]);
+
+  const isValidImageUrl = (url: string): boolean => {
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const handleImageError = (itemId: number) => {
+    setImageErrors(prev => ({
+      ...prev,
+      [itemId]: true
+    }));
+  };
 
   if (!isClient || !user || loading) {
     return (
@@ -116,14 +133,21 @@ export default function CartPage() {
                 <div className="row g-3 align-items-center">
                   <div className="col-md-2 col-4">
                     <div className="position-relative" style={{ width: '100%', aspectRatio: '1/1' }}>
-                      <Image
-                        src={item?.Product?.images?.[0] || '/placeholder.svg'}
-                        alt={item?.Product?.name || 'Product image'}
-                        fill
-                        className="img-fluid rounded"
-                        style={{ objectFit: 'cover' }}
-                        sizes="(max-width: 768px) 100vw, 150px"
-                      />
+                      {item?.Product?.images?.[0] && !imageErrors[item.id] && isValidImageUrl(item.Product.images[0]) ? (
+                        <Image
+                          src={item.Product.images[0]}
+                          alt={item?.Product?.name || 'Product image'}
+                          fill
+                          className="img-fluid rounded"
+                          style={{ objectFit: 'cover' }}
+                          sizes="(max-width: 768px) 100vw, 150px"
+                          onError={() => handleImageError(item.id)}
+                        />
+                      ) : (
+                        <div className="bg-light d-flex align-items-center justify-content-center rounded h-100">
+                          <span className="text-muted">🏎️</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="col-md-4 col-8">
