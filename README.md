@@ -1,7 +1,7 @@
 # Raceparts E-commerce
 
 ## Project Overview
-A full-stack e-commerce application for racing car parts built with microservices architecture. Includes product catalog, shopping cart, user authentication, payment processing, and admin functionality.
+A full-stack e-commerce application for racing car parts built with a microservices architecture. Includes product catalog, shopping cart, user authentication, payment processing, and admin functionality.
 
 ## Technology Stack
 - **Frontend**: Next.js 13 (TypeScript)
@@ -16,7 +16,7 @@ A full-stack e-commerce application for racing car parts built with microservice
 - **Infrastructure**: Microservices architecture
 
 ## Prerequisites
-- Node.js v18+
+- Node.js v22+
 - npm v9+
 - SQLite
 - Stripe account (for payments)
@@ -32,7 +32,7 @@ cd raceparts-ecommerce
 ### 2. Install dependencies
 ```bash
 # Install root dependencies
-npm install
+npm run install-all
 
 # Install frontend dependencies
 cd frontend
