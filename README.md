@@ -1,122 +1,109 @@
-# Raceparts E-commerce
+# RaceParts E-commerce Platform
 
-## Project Overview
-A full-stack e-commerce application for racing car parts built with a microservices architecture. Includes product catalog, shopping cart, user authentication, payment processing, and admin functionality.
+A modern, full-stack e-commerce platform for automotive accessories, built with a microservice architecture using Node.js, Express, Sequelize, SQLite, and a Next.js frontend.
 
-## Technology Stack
-- **Frontend**: Next.js 13 (TypeScript)
-- **Backend Services**: 
-  - API Gateway
-  - Authentication Service
-  - Product Service
-  - Cart Service
-  - Payment Service
-  - Admin Service
-- **Database**: Sequelize ORM with migrations and seeders
-- **Infrastructure**: Microservices architecture
+## Features
 
-## Prerequisites
+- Microservices for authentication, product management, cart, payment, and admin panel
+- Admin panel with AdminJS for managing users, products, categories, and orders
+- JWT-based authentication and role management
+- Stripe integration for payments
+- SQLite database with Sequelize ORM
+- Modern Next.js frontend (React)
+- Docker-ready architecture
+
+## Project Structure
+
+```
+root/
+├── backend/
+│   ├── admin-service/      # Admin panel (AdminJS, Sequelize)
+│   ├── api-gateway/        # API Gateway (Express)
+│   ├── auth-service/       # Authentication microservice
+│   ├── cart-service/       # Shopping cart microservice
+│   ├── payment-service/    # Payment and order microservice
+│   └── product-service/    # Product and category microservice
+├── database/               # SQLite DB, migrations, seeders
+├── docs/                   # API and architecture documentation
+├── frontend/               # Next.js frontend (React)
+├── .env                    # Environment variables
+├── package.json            # Root package (scripts, dependencies)
+└── README.md               # Project overview (this file)
+```
+
+## Getting Started
+
+### Prerequisites
 - Node.js v22+
 - npm v9+
-- SQLite
-- Stripe account (for payments)
+- (Optional) Docker for containerized deployment
 
-## Setup Instructions
-
-### 1. Clone repository
+### 1. Install Dependencies
+From the root directory, run:
 ```bash
-git clone https://github.com/your-username/raceparts-ecommerce.git
-cd raceparts-ecommerce
-```
-
-### 2. Install dependencies
-```bash
-# Install root dependencies
-npm run install-all
-
-# Install frontend dependencies
-cd frontend
 npm install
-
-# Install backend dependencies (for each service)
-cd ../backend
-for service in */; do cd $service && npm install && cd ..; done
+```
+Then install dependencies for each service:
+```bash
+cd backend/admin-service && npm install
+cd ../api-gateway && npm install
+cd ../auth-service && npm install
+cd ../cart-service && npm install
+cd ../payment-service && npm install
+cd ../product-service && npm install
+cd ../../../frontend && npm install
 ```
 
-### 3. Database Configuration
-1. Create a new database in your SQL server
-2. Configure connection settings in `database/config.js`
-3. Run migrations and seeders:
+### 2. Database Setup
+- The default database is SQLite, located at `database/raceparts.db`.
+- To initialize tables and seed data:
 ```bash
-cd database
+# (If using Sequelize CLI)
 npx sequelize-cli db:migrate
 npx sequelize-cli db:seed:all
 ```
 
-### 4. Environment Variables
-Copy `.env.example` to `.env` and fill in values:
-```bash
-cp .env.example .env
+### 3. Environment Variables
+Copy `.env.example` to `.env` and set values as needed. Example:
 ```
-Required variables:
-- `DATABASE_URL` - Database connection string
-- `JWT_SECRET` - Secret for JSON Web Tokens
-- `STRIPE_SECRET_KEY` - Stripe API secret key
-- `NEXTAUTH_SECRET` - NextAuth secret
+ADMIN_EMAIL=admin@raceparts.com
+ADMIN_PASSWORD=admin123
+STRIPE_SECRET_KEY=sk_test_...
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
+```
 
-### 5. Run the Application
-Start all services in separate terminals:
+### 4. Running Services
+Each service can be started individually:
 ```bash
-# Start API Gateway
-cd backend/api-gateway
-npm start
-
-# Start Auth Service
-cd ../auth-service
-npm start
-
-# Start Product Service
-cd ../product-service
-npm start
-
-# Start Cart Service
-cd ../cart-service
-npm start
-
-# Start Payment Service
-cd ../payment-service
-npm start
-
-# Start Admin Service
-cd ../admin-service
-npm start
-
-# Start Frontend
-cd ../../frontend
+# Example for admin-service
+cd backend/admin-service
 npm run dev
+# Repeat for other services
+```
+Or use Docker Compose (if provided):
+```bash
+docker-compose up --build
 ```
 
-## Project Structure
+### 5. Running the Frontend
+```bash
+cd frontend
+npm run dev
+# Visit http://localhost:5173
 ```
-├── backend/              # Backend microservices
-│   ├── admin-service/    # Admin management
-│   ├── api-gateway/      # API routing gateway
-│   ├── auth-service/     # User authentication
-│   ├── cart-service/     # Shopping cart management
-│   ├── payment-service/  # Payment processing
-│   └── product-service/  # Product catalog
-├── database/             # Database migrations & seeders
-├── docs/                 # Documentation
-├── frontend/             # Next.js frontend application
-├── .env.example          # Environment template
-└── .sequelizerc          # Sequelize configuration
-```
+
+## Admin Panel
+- URL: `http://localhost:3005/admin`
+- Default credentials: `admin@raceparts.com` / `admin123` (or as set in `.env`)
 
 ## API Documentation
-See [docs/API_Documentation.md](docs/API_Documentation.md) for detailed API specifications.
+See [docs/API_Documentation.md](docs/API_Documentation.md) for all endpoints and usage.
 
-## Deployment
-The application can be deployed using Docker containers. Refer to [docs/HANDOVER.md](docs/HANDOVER.md) for deployment instructions.
+## Architecture
+See [docs/Architecture_and_design_system.md](docs/Architecture_and_design_system.md) for diagrams and design notes.
+
+## Handover & Maintenance
+See [docs/HANDOVER.md](docs/HANDOVER.md) for project handover details.
 
 ## License
-MIT Licensed - See [LICENSE](LICENSE) for details.
+MIT

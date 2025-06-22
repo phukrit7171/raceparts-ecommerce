@@ -2,15 +2,15 @@
 
 ## Base URL
 
-```text
+```
 http://localhost:3000/api
 ```
 
 ## Authentication
 
-All protected routes require JWT token in cookies or Authorization header:
+All protected routes require a JWT token in cookies or the Authorization header:
 
-```text
+```
 Authorization: Bearer <jwt_token>
 ```
 
@@ -19,7 +19,6 @@ Authorization: Bearer <jwt_token>
 ## 🔐 Authentication Service (Port: 3001)
 
 ### POST /auth/register
-
 Register a new user
 
 ```json
@@ -32,9 +31,7 @@ Register a new user
   "address": "123 Main St, City, State"
 }
 ```
-
 **Response:**
-
 ```json
 {
   "success": true,
@@ -51,18 +48,14 @@ Register a new user
 ```
 
 ### POST /auth/login
-
 User login
-
 ```json
 {
   "email": "user@example.com",
   "password": "password123"
 }
 ```
-
 **Response:**
-
 ```json
 {
   "success": true,
@@ -79,15 +72,11 @@ User login
 ```
 
 ### POST /auth/logout
-
 User logout (clears JWT cookie)
 
 ### GET /auth/me
-
 Get current user profile (Protected)
-
 **Response:**
-
 ```json
 {
   "success": true,
@@ -108,11 +97,8 @@ Get current user profile (Protected)
 ## 🛍️ Product Service (Port: 3002)
 
 ### GET /products
-
 Get all products with pagination and filtering
-
 **Query Parameters:**
-
 - `page`: Page number (default: 1)
 - `limit`: Items per page (default: 12)
 - `category`: Category slug
@@ -121,9 +107,7 @@ Get all products with pagination and filtering
 - `order`: Sort order (asc, desc)
 - `min_price`: Minimum price
 - `max_price`: Maximum price
-
 **Response:**
-
 ```json
 {
   "success": true,
@@ -162,21 +146,16 @@ Get all products with pagination and filtering
 ```
 
 ### GET /products/:uuid
-
 Get single product by UUID
 
 ### GET /products/slug/:slug
-
 Get single product by slug
 
 ### GET /products/category/:slug
-
 Get products by category slug
 
 ### POST /products/search
-
 Advanced product search
-
 ```json
 {
   "query": "brake pads",
@@ -193,11 +172,8 @@ Advanced product search
 ## 📂 Category Service
 
 ### GET /categories
-
 Get all categories
-
 **Response:**
-
 ```json
 {
   "success": true,
@@ -211,5 +187,105 @@ Get all categories
       "product_count": 25
     }
   ]
+}
+```
+
+---
+
+## 🛒 Cart Service (Port: 3003)
+
+### GET /cart
+Get all items in the user's cart (requires authentication)
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "items": [
+      {
+        "id": 1,
+        "quantity": 2,
+        "Product": {
+          "id": 10,
+          "name": "Racing Brake Pads",
+          "price": 199.99,
+          "slug": "racing-brake-pads",
+          "images": ["/images/brake-pads-1.jpg"]
+        }
+      }
+    ],
+    "subtotal": 399.98
+  }
+}
+```
+
+### POST /cart
+Add an item to the cart
+```json
+{
+  "productId": 10,
+  "quantity": 2
+}
+```
+
+### PATCH /cart/:itemId
+Update item quantity in the cart
+```json
+{
+  "quantity": 3
+}
+```
+
+### DELETE /cart/:itemId
+Remove an item from the cart
+
+---
+
+## 💳 Payment Service (Port: 3004)
+
+### POST /payment/create-checkout-session
+Create a Stripe Checkout session for the current user's cart
+```json
+{
+  "origin": "http://localhost:5173"
+}
+```
+**Response:**
+```json
+{
+  "success": true,
+  "url": "https://checkout.stripe.com/pay/cs_test_..."
+}
+```
+
+### POST /payment/webhook
+Stripe webhook endpoint (called by Stripe, not by frontend)
+
+---
+
+## 📦 Order Service (via Payment Service)
+
+### GET /orders (future)
+Get all orders for the current user (requires authentication)
+
+### GET /orders/:uuid (future)
+Get a single order by UUID
+
+---
+
+## 🛠️ Admin Service (Port: 3005)
+
+- AdminJS panel for managing users, products, categories, orders, and cart items.
+- URL: `http://localhost:3005/admin`
+- Login with credentials from `.env` (default: `admin@raceparts.com` / `admin123`)
+
+---
+
+## Error Response Format
+All endpoints return errors in the following format:
+```json
+{
+  "success": false,
+  "message": "Error message here"
 }
 ```

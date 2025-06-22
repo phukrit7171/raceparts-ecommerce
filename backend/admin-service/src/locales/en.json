@@ -1,0 +1,35 @@
+{
+  "translation": {
+    "labels": {
+      "users": "Users",
+      "User Management": "User Management",
+      "categories": "Categories",
+      "Product Management": "Product Management",
+      "products": "Products",
+      "orders": "Orders",
+      "Order Management": "Order Management",
+      "order_items": "Order Items",
+      "cart_items": "Cart Items",
+      "role": {
+        "admin": "Administrator",
+        "customer": "Customer",
+        "manager": "Manager"
+      },
+      "isActive": {
+        "true": "Yes",
+        "false": "No"
+      }
+    },
+    "properties": {
+      "email": "Email",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "role": "Role",
+      "categoryId": "Category",
+      "Category Id": "Category",
+      "isActive": "Active",
+      "price": "Price",
+      "Price": "Price"
+    }
+  }
+}
