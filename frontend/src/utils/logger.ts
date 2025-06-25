@@ -4,7 +4,7 @@ interface LogEntry {
   timestamp: string;
   level: LogLevel;
   message: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 class Logger {
@@ -16,12 +16,12 @@ class Logger {
     this.level = level;
   }
 
-  private log(level: LogLevel, message: string, meta?: any) {
+  private log(level: LogLevel, message: string, meta?: Record<string, unknown>) {
     const entry: LogEntry = {
       timestamp: new Date().toISOString(),
       level,
       message,
-      ...meta
+      ...(meta as object)
     };
 
     // Add to in-memory logs
@@ -61,25 +61,25 @@ class Logger {
     }
   }
 
-  debug(message: string, meta?: any) {
+  debug(message: string, meta?: Record<string, unknown>) {
     if (this.shouldLog('debug')) {
       this.log('debug', message, meta);
     }
   }
 
-  info(message: string, meta?: any) {
+  info(message: string, meta?: Record<string, unknown>) {
     if (this.shouldLog('info')) {
       this.log('info', message, meta);
     }
   }
 
-  warn(message: string, meta?: any) {
+  warn(message: string, meta?: Record<string, unknown>) {
     if (this.shouldLog('warn')) {
       this.log('warn', message, meta);
     }
   }
 
-  error(message: string, meta?: any) {
+  error(message: string, meta?: Record<string, unknown>) {
     if (this.shouldLog('error')) {
       this.log('error', message, meta);
     }
@@ -105,4 +105,4 @@ class Logger {
 // Create a singleton instance
 const logger = new Logger(process.env.NEXT_PUBLIC_LOG_LEVEL as LogLevel || 'debug');
 
-export default logger; 
+export default logger;

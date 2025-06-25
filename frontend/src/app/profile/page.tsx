@@ -38,7 +38,7 @@ export default function ProfilePage() {
           phone: userData.phone || '',
           address: userData.address || '',
         });
-      } catch (error) {
+      } catch {
         showAlert.error('Failed to load profile data');
         router.push('/auth/login');
       } finally {
@@ -67,7 +67,7 @@ export default function ProfilePage() {
 
       await refreshAuth();
       showAlert.success('Profile updated successfully!');
-    } catch (error) {
+    } catch {
       showAlert.error('Failed to update profile. Please try again.');
     } finally {
       setSaving(false);
@@ -202,4 +202,4 @@ export default function ProfilePage() {
       </div>
     </div>
   );
-} 
+}

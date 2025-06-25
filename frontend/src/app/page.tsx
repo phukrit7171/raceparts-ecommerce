@@ -12,6 +12,7 @@ interface Product {
   price: number;
   slug: string;
   image_url?: string;
+  images?: string[]; // Added to match ProductCard requirements
   stock_quantity?: number;
 }
 
@@ -23,7 +24,20 @@ export default function HomePage() {
     const fetchFeaturedProducts = async () => {
       try {
         const response = await productsAPI.getProducts({ limit: 6 });
-        setFeaturedProducts(response.data.data);
+        // Ensure each product has an images array
+        const productsWithImages = response.data.data.map((product: Record<string, unknown>) =>
+          typeof product === 'object' && product !== null
+            ? {
+                ...product,
+                images: Array.isArray((product as any).images)
+                  ? (product as any).images
+                  : (product as any).image_url
+                  ? [(product as any).image_url]
+                  : [],
+              }
+            : {}
+        );
+        setFeaturedProducts(productsWithImages);
       } catch (error) {
         console.error('Error fetching featured products:', error);
       } finally {
@@ -133,7 +147,13 @@ export default function HomePage() {
           ) : featuredProducts.length > 0 ? (
             <div className="row">
               {featuredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <ProductCard
+                  key={product.id}
+                  product={{
+                    ...product,
+                    images: product.images ?? [],
+                  }}
+                />
               ))}
             </div>
           ) : (
