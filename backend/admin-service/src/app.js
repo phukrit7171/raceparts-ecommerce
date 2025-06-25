@@ -7,12 +7,14 @@ const AdminJSExpress = require("@adminjs/express");
 const AdminJSSequelize = require("@adminjs/sequelize");
 const session = require("express-session");
 const bcrypt = require("bcryptjs");
+// DEBUG: Checking const declaration
+console.log('DEBUG: AdminJSSequelize object:', typeof AdminJSSequelize, AdminJSSequelize);
 
 // --- v6 COMPATIBILITY CHANGES START HERE ---
 
 // 1. Explicitly import the base classes from the adapter
 const { Database, Resource } = AdminJSSequelize;
-
+console.log('DEBUG: Database and Resource imported:', { Database: typeof Database, Resource: typeof Resource });
 // 2. Load the User model from the auth-service
 const UserModel = require("../../auth-service/src/models/User");
 
@@ -59,6 +61,7 @@ const translations = {
       description: 'Description',
       price: 'Price',
       stock_quantity: 'Stock Quantity',
+      category_id: 'Category',
       images: 'Images',
       specifications: 'Specifications',
       is_active: 'Is Active',
@@ -245,16 +248,110 @@ const start = async () => {
             icon: 'Package',
           },
           properties: {
-            name: { isTitle: true },
+            id: {
+              isVisible: {
+                list: true,
+                filter: true,
+                show: true,
+                edit: false
+              }
+            },
+            uuid: {
+              isVisible: {
+                list: false,
+                filter: false,
+                show: true,
+                edit: false
+              }
+            },
+            name: {
+              isTitle: true,
+              isRequired: true
+            },
+            slug: {
+              isRequired: true
+            },
+            description: {
+              type: 'textarea'
+            },
+            price: {
+              isRequired: true,
+              type: 'number'
+            },
+            stock_quantity: {
+              type: 'number',
+              isRequired: false
+            },
+            category_id: {
+              reference: 'categories',
+              isVisible: {
+                list: true,
+                filter: true,
+                show: true,
+                edit: true
+              }
+            },
+            images: {
+              type: 'mixed',
+              isVisible: {
+                list: false,
+                filter: false,
+                show: true,
+                edit: true
+              }
+            },
+            specifications: {
+              type: 'mixed',
+              isVisible: {
+                list: false,
+                filter: false,
+                show: true,
+                edit: true
+              }
+            },
             is_active: {
               availableValues: [
                 { value: true, label: translations.translation.labels['is_active.true'] },
                 { value: false, label: translations.translation.labels['is_active.false'] },
               ],
             },
+            createdAt: {
+              isVisible: {
+                list: true,
+                filter: true,
+                show: true,
+                edit: false
+              }
+            },
+            updatedAt: {
+              isVisible: {
+                list: false,
+                filter: false,
+                show: true,
+                edit: false
+              }
+            }
           },
-          listProperties: ['id', 'name', 'price', 'stock_quantity', 'is_active', 'createdAt'],
-          id: 'products'
+          listProperties: ['id', 'name', 'price', 'stock_quantity', 'category_id', 'is_active', 'createdAt'],
+          id: 'products',
+          actions: {
+            new: {
+              before: async (request) => {
+                console.log('[AdminJS Product] Creating new product with payload:', request.payload);
+                return request;
+              },
+              after: async (response) => {
+                console.log('[AdminJS Product] Product created:', response.record?.params);
+                return response;
+              }
+            },
+            edit: {
+              before: async (request) => {
+                console.log('[AdminJS Product] Editing product with payload:', request.payload);
+                return request;
+              }
+            }
+          }
         },
       },
       {
