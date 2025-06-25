@@ -32,7 +32,7 @@ export default function RootLayout({
                     <p className="mb-0">Premium racing components for enthusiasts</p>
                   </div>
                   <div className="col-md-6 text-md-end">
-                    <p className="mb-0">© 2024 RaceParts. All rights reserved.</p>
+                    <p className="mb-0">© 2025 RaceParts. All rights reserved.</p>
                   </div>
                 </div>
               </div>
