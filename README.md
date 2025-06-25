@@ -45,22 +45,14 @@ npm install
 ```
 Then install dependencies for each service:
 ```bash
-cd backend/admin-service && npm install
-cd ../api-gateway && npm install
-cd ../auth-service && npm install
-cd ../cart-service && npm install
-cd ../payment-service && npm install
-cd ../product-service && npm install
-cd ../../../frontend && npm install
+npm run install-all
 ```
 
 ### 2. Database Setup
 - The default database is SQLite, located at `database/raceparts.db`.
 - To initialize tables and seed data:
 ```bash
-# (If using Sequelize CLI)
-npx sequelize-cli db:migrate
-npx sequelize-cli db:seed:all
+npm run db:reset
 ```
 
 ### 3. Environment Variables
@@ -73,24 +65,13 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
 ```
 
 ### 4. Running Services
-Each service can be started individually:
+All services can be started:
 ```bash
-# Example for admin-service
-cd backend/admin-service
 npm run dev
-# Repeat for other services
-```
-Or use Docker Compose (if provided):
-```bash
-docker-compose up --build
 ```
 
-### 5. Running the Frontend
-```bash
-cd frontend
-npm run dev
-# Visit http://localhost:5173
-```
+
+
 
 ## Admin Panel
 - URL: `http://localhost:3005/admin`
