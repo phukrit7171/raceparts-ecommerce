@@ -10,7 +10,6 @@ A modern, full-stack e-commerce platform for automotive accessories, built with 
 - Stripe integration for payments
 - SQLite database with Sequelize ORM
 - Modern Next.js frontend (React)
-- Docker-ready architecture
 
 ## Project Structure
 
@@ -36,7 +35,6 @@ root/
 ### Prerequisites
 - Node.js v22+
 - npm v9+
-- (Optional) Docker for containerized deployment
 
 ### 1. Install Dependencies
 From the root directory, run:
@@ -63,8 +61,26 @@ ADMIN_PASSWORD=admin123
 STRIPE_SECRET_KEY=sk_test_...
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
 ```
+<!-- start Stripe forward port for redirect from checkout page-->
+### 4. Stripe Checkout Redirect (Local Development)
 
-### 4. Running Services
+If you are testing Stripe payments locally, you need to forward the Stripe webhook and checkout redirect to your local frontend.  
+Use the Stripe CLI to forward events and handle redirects:
+
+```bash
+# Forward Stripe webhooks to your backend (adjust port as needed)
+stripe listen --forward-to localhost:3004/webhook
+
+# Forward checkout success/cancel redirects to your frontend (adjust port as needed)
+stripe checkout sessions create \
+  --success-url "http://localhost:3000/success?session_id={CHECKOUT_SESSION_ID}" \
+  --cancel-url "http://localhost:3000/cancel"
+```
+
+- Replace ports if your frontend/backend run on different ports.
+- Make sure your `.env` Stripe keys match your Stripe dashboard.
+
+### 5. Running Services
 All services can be started:
 ```bash
 npm run dev
@@ -82,6 +98,7 @@ See [docs/API_Documentation.md](docs/API_Documentation.md) for all endpoints and
 
 ## Architecture
 See [docs/Architecture_and_design_system.md](docs/Architecture_and_design_system.md) for diagrams and design notes.
+- Note: The architecture documentation includes Docker-based deployment for future expansion, but Docker is not required for local development at this time.
 
 ## Handover & Maintenance
 See [docs/HANDOVER.md](docs/HANDOVER.md) for project handover details.
